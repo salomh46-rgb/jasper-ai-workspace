@@ -1,5 +1,7 @@
 import logging
-from aiogram import Bot
+import asyncio
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import CommandStart
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from app.core.database import AsyncSessionLocal
@@ -8,9 +10,74 @@ from app.models.lead import Lead
 from app.models.conversation import Conversation, ChatMessage
 from app.services.ai_service import AIService
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("bot_manager")
 
 class BotManager:
+    _active_bot_tasks = {}
+    _active_bot_instances = {}
+
+    @classmethod
+    async def start_all_agent_bots(cls):
+        async with AsyncSessionLocal() as db:
+            res = await db.execute(select(Agent).where(Agent.is_active == True))
+            agents = res.scalars().all()
+            logger.info(f"🤖 Bazada {len(agents)} ta agent bot topildi.")
+            for agent in agents:
+                tok = (agent.bot_token or "").strip()
+                if tok and ":" in tok:
+                    await cls.start_bot(tok)
+
+    @classmethod
+    async def start_bot(cls, bot_token: str):
+        bot_token = bot_token.strip()
+        if not bot_token or ":" not in bot_token:
+            return
+        if bot_token in cls._active_bot_tasks:
+            return
+
+        try:
+            bot = Bot(token=bot_token)
+            await bot.delete_webhook(drop_pending_updates=True)
+            dp = Dispatcher()
+
+            @dp.message()
+            async def on_message(message: types.Message):
+                from_user = {
+                    "id": message.from_user.id,
+                    "first_name": message.from_user.first_name,
+                    "last_name": message.from_user.last_name,
+                    "username": message.from_user.username
+                }
+                text = message.text or ""
+                if message.voice:
+                    text = "[Ovozli xabar yuborildi]"
+
+                reply = await cls.handle_customer_message(
+                    bot_token=bot_token,
+                    telegram_user=from_user,
+                    message_text=text
+                )
+                if reply:
+                    await message.answer(reply, parse_mode="HTML")
+
+            task = asyncio.create_task(dp.start_polling(bot))
+            cls._active_bot_tasks[bot_token] = task
+            cls._active_bot_instances[bot_token] = bot
+            logger.info(f"✅ Agent Bot ({bot_token[:8]}...) Telegramda jonli (Polling) tinglashni boshladi!")
+        except Exception as e:
+            logger.error(f"❌ Agent botni ishga tushirishda xatolik ({bot_token[:8]}...): {e}")
+
+    @classmethod
+    async def stop_bot(cls, bot_token: str):
+        bot_token = bot_token.strip()
+        if bot_token in cls._active_bot_tasks:
+            cls._active_bot_tasks[bot_token].cancel()
+            del cls._active_bot_tasks[bot_token]
+        if bot_token in cls._active_bot_instances:
+            await cls._active_bot_instances[bot_token].session.close()
+            del cls._active_bot_instances[bot_token]
+        logger.info(f"🛑 Agent Bot ({bot_token[:8]}...) to'xtatildi.")
+
     @classmethod
     async def handle_customer_message(cls, bot_token: str, telegram_user: dict, message_text: str) -> str:
         async with AsyncSessionLocal() as db:
@@ -23,7 +90,12 @@ class BotManager:
             agent = res.scalar_one_or_none()
             
             if not agent:
-                return "Kechirasiz, ushbu bot hozirda faol emas."
+                return "Assalomu alaykum! Tizim sozlanmoqda."
+
+            # Fast greeting reply for /start
+            if message_text.strip() == "/start":
+                welcome = agent.welcome_message or f"Assalomu alaykum! Men {agent.name} xizmatining aqlli yordamchisiman. Sizga qanday yordam bera olaman?"
+                return welcome
 
             # 2. Get or create conversation
             customer_tg_id = telegram_user.get("id")
@@ -53,7 +125,6 @@ class BotManager:
             if conversation.is_paused_for_human or is_requesting_human:
                 if is_requesting_human and not conversation.is_paused_for_human:
                     conversation.is_paused_for_human = True
-                    # Notify owner
                     if agent.owner and agent.owner.telegram_id:
                         from app.services.notification_service import NotificationService
                         await NotificationService.notify_human_takeover_request(

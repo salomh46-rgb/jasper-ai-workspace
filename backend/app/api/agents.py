@@ -179,6 +179,9 @@ async def create_agent(payload: AgentCreateRequest, db: AsyncSession = Depends(g
 
     await db.commit()
     await db.refresh(agent)
+    if agent.bot_token:
+        from app.services.bot_manager import BotManager
+        await BotManager.start_bot(agent.bot_token)
     return {"status": "success", "id": agent.id, "agent_id": agent.id, "message": "Agent muvaffaqiyatli yaratildi!"}
 
 @router.get("/{agent_id}")
@@ -205,6 +208,9 @@ async def update_agent(agent_id: int, payload: AgentUpdateRequest, db: AsyncSess
 
     await db.commit()
     await db.refresh(agent)
+    if agent.bot_token:
+        from app.services.bot_manager import BotManager
+        await BotManager.start_bot(agent.bot_token)
     return {"status": "success", "id": agent.id, "agent_id": agent.id, "message": "Agent muvaffaqiyatli yangilandi!"}
 
 @router.post("/{agent_id}/test")
@@ -254,6 +260,9 @@ async def delete_agent(agent_id: int, db: AsyncSession = Depends(get_db), curren
     if not agent:
         raise HTTPException(status_code=404, detail="Agent topilmadi")
 
+    if agent.bot_token:
+        from app.services.bot_manager import BotManager
+        await BotManager.stop_bot(agent.bot_token)
     await db.delete(agent)
     await db.commit()
     return {"status": "success", "message": "Agent o'chirildi"}

@@ -17,13 +17,17 @@ class AIService:
                 knowledge_text += f"📌 {item.title}:\n{item.content}\n\n"
         
         company_info = ""
-        if agent.company_name or agent.phone_number or agent.address or agent.working_hours:
+        c_name = getattr(agent, "company_name", None)
+        c_phone = getattr(agent, "phone_number", None)
+        c_addr = getattr(agent, "address", None)
+        c_hours = getattr(agent, "working_hours", None)
+        if c_name or c_phone or c_addr or c_hours:
             company_info = (
                 f"\n--- ALOQA VA TASHKILOT MA'LUMOTLARI ---\n"
-                f"🏢 Tashkilot: {agent.company_name or 'Kompaniya'}\n"
-                f"📞 Telefon: {agent.phone_number or 'Mavjud emas'}\n"
-                f"📍 Manzil: {agent.address or 'Mavjud emas'}\n"
-                f"⏰ Ish vaqti: {agent.working_hours or 'Mavjud emas'}\n"
+                f"🏢 Tashkilot: {c_name or 'Kompaniya'}\n"
+                f"📞 Telefon: {c_phone or 'Mavjud emas'}\n"
+                f"📍 Manzil: {c_addr or 'Mavjud emas'}\n"
+                f"⏰ Ish vaqti: {c_hours or 'Mavjud emas'}\n"
             )
 
         payment_info = ""
@@ -42,17 +46,16 @@ class AIService:
 {knowledge_text}
 
 --- MUHIM KO'RSATMALAR ---
-1. Har doim samimiy, xushmuomala, professional va tabiiy o'zbek tilida (yoki mijoz gapirgan/yozgan tilda) javob bering.
-2. Faqat yuqoridagi bilimlar bazasiga asoslanib aniq javob bering. Bilmagan narsangizni to'qimang.
-3. Agar mijoz xizmatga/qabulga yozilmoqchi bo'lsa yoki mahsulot sotib olmoqchi bo'lsa:
-   - Undan ismini, telefon raqamini va qulay vaqtini/manzilini aniqlang.
+1. Har doim samimiy, xushmuomala, professional va tabiiy o'zbek tilida qisqa, aniq va lo'nda javob bering.
+2. Faqat yuqoridagi bilimlar bazasiga asoslanib aniq javob bering.
+3. Agar mijoz xizmatga/qabulga yozilmoqchi bo'lsa yoki tez yordam holati bo'lsa, zudlik bilan kerakli choralarni va telefon raqamini aniqlang.
 4. Javobingiz oxirida AGAR mijoz o'z telefon raqamini yoki buyurtma xohishini bildirgan bo'lsa, maxsus JSON blok qo'shing:
 ```lead_json
 {{
   "has_lead": true,
   "customer_name": "Ism yoki null",
   "customer_phone": "Telefon yoki null",
-  "intent": "appointment | order | consultation",
+  "intent": "emergency | appointment | order | consultation",
   "summary": "Mijoz xohishi haqida qisqacha xulosa"
 }}
 ```
@@ -68,7 +71,8 @@ Agar hali lid shakllanmagan bo'lsa, `lead_json` blokini qo'shmang."""
                 "lead_data": None
             }
 
-        candidate_models = [settings.GEMINI_MODEL, "gemini-flash-lite-latest", "gemini-3.6-flash", "gemini-flash-latest"]
+        # Use the fastest reliable model first (gemini-flash-lite-latest responds in sub-second)
+        candidate_models = ["gemini-flash-lite-latest", "gemini-flash-latest", "gemini-2.5-flash-lite", settings.GEMINI_MODEL]
         candidate_models = list(dict.fromkeys([m for m in candidate_models if m]))
 
         payload = {
@@ -77,16 +81,18 @@ Agar hali lid shakllanmagan bo'lsa, `lead_json` blokini qo'shmang."""
                 "parts": [{"text": system_instruction}]
             },
             "generationConfig": {
-                "temperature": 0.3,
-                "maxOutputTokens": 800
+                "temperature": 0.2,
+                "maxOutputTokens": 600
             }
         }
 
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=8.0) as client:
             for model_name in candidate_models:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
                 try:
                     res = await client.post(url, json=payload)
+                    if res.status_code != 200:
+                        continue
                     data = res.json()
                     
                     if "candidates" in data and len(data["candidates"]) > 0:
@@ -108,9 +114,6 @@ Agar hali lid shakllanmagan bo'lsa, `lead_json` blokini qo'shmang."""
                             "reply": clean_reply,
                             "lead_data": lead_data
                         }
-                    else:
-                        logger.warning(f"Gemini API model {model_name} xatolik: {data}. Keyingi model sinab ko'rilmoqda...")
-                        continue
                 except Exception as e:
                     logger.error(f"Error calling model {model_name}: {e}")
                     continue
@@ -129,15 +132,21 @@ Agar hali lid shakllanmagan bo'lsa, `lead_json` blokini qo'shmang."""
         user_message: str
     ) -> Dict[str, Any]:
         system_instruction = cls._build_system_instruction(agent, knowledge_items)
-        
+
+        # Ultra fast response for standard single-word greetings
+        clean_msg = user_message.strip().lower()
+        if clean_msg in ["salom", "assalomu alaykum", "salom aleykum", "hayrli kun", "/start"]:
+            welcome = agent.welcome_message or "Assalomu alaykum! Sizga qanday yordam bera olaman?"
+            return {"reply": welcome, "lead_data": None}
+
         contents = []
-        for msg in chat_history[-6:]:
-            role = "user" if msg["sender"] == "customer" else "model"
+        for msg in chat_history[-4:]:
+            role = "user" if msg.get("sender") == "customer" else "model"
             contents.append({
                 "role": role,
-                "parts": [{"text": msg["text"]}]
+                "parts": [{"text": msg.get("text", "")}]
             })
-        
+
         contents.append({
             "role": "user",
             "parts": [{"text": user_message}]
@@ -155,82 +164,70 @@ Agar hali lid shakllanmagan bo'lsa, `lead_json` blokini qo'shmang."""
         mime_type: str = "audio/ogg"
     ) -> Dict[str, Any]:
         system_instruction = cls._build_system_instruction(agent, knowledge_items)
-        base64_audio = base64.b64encode(audio_bytes).decode("utf-8")
-        
-        contents = []
-        for msg in chat_history[-4:]:
-            role = "user" if msg["sender"] == "customer" else "model"
-            contents.append({
-                "role": role,
-                "parts": [{"text": msg["text"]}]
-            })
-        
-        contents.append({
+        audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
+
+        contents = [{
             "role": "user",
             "parts": [
                 {
                     "inlineData": {
                         "mimeType": mime_type,
-                        "data": base64_audio
+                        "data": audio_b64
                     }
                 },
                 {
-                    "text": "Mijoz yuqoridagi ovozli xabarni yubordi. Uning ovozli murojaatini o'zbek tilida to'liq tushunib, bilimlar bazasi asosida samimiy, aniq va xushmuomala javob qaytaring. Agar buyurtma yoki qabulga yozilish niyati bo'lsa, lead_json blokini qo'shing."
+                    "text": "Ushbu ovozli xabarni diqqat bilan tinglang va bilimlaringiz asosida professional tarzda o'zbek tilida javob bering."
                 }
             ]
-        })
+        }]
 
         return await cls._call_gemini_api(contents, system_instruction)
 
     @classmethod
-    async def enhance_system_prompt(cls, business_description: str, category: str = "custom") -> Dict[str, str]:
+    async def enhance_system_prompt(cls, user_description: str, category: str = "custom") -> Dict[str, str]:
+        prompt = f"""Siz tajribali AI Agent me'morisiz. Foydalanuvchi quyidagi biznes/tashkilot uchun Telegram AI Agent yaratmoqchi:
+Tavsif: "{user_description}"
+Kategoriya: "{category}"
+
+Ushbu ma'lumotdan kelib chiqib:
+1. Mukammal, aniq va do'stona System Prompt (Tizim ko'rsatmasi) tuzib bering.
+2. Salomlashish xabari (/start) tayyorlang.
+3. Kategoriya nomini aniqlang.
+
+Javobingizni FAQAT quyidagi JSON formatda qaytaring:
+{{
+  "name": "Kompaniya yoki Agent nomi",
+  "system_prompt": "Tizim ko'rsatmasi...",
+  "welcome_message": "Salomlashish xabari..."
+}}"""
+
         api_key = settings.GEMINI_API_KEY
-        if not api_key:
+        if not api_key or api_key == "YOUR_GEMINI_API_KEY_HERE":
             return {
-                "suggested_name": "Mening AI Yordamchim",
-                "system_prompt": f"Siz {business_description} sohasi bo'yicha aqlli va xushmuomala AI konsultantisiz.",
+                "name": "Maxsus AI Yordamchi",
+                "system_prompt": f"Siz {user_description} bo'yicha mijozlarga xizmat ko'rsatuvchi professional AI xodimsiz.",
                 "welcome_message": "Assalomu alaykum! Sizga qanday yordam bera olaman?"
             }
 
-        prompt = f"""Quyidagi biznes uchun professional, yuqori konversiyali va samimiy Telegram AI Agent sozlamalarini o'zbek tilida yaratib bering.
-Hech qanday qoliplarga cheklanmang. Biznesning o'ziga xos xususiyatlarini to'liq ochib bering.
-
-Biznes haqida ma'lumot:
-"{business_description}"
-Yo'nalish: {category}
-
-Quyidagi JSON formatda javob bering (boshqa hech narsa yozmang):
-```json
-{{
-  "suggested_name": "Qisqa va jarangdor agent nomi (masalan: Samarqand Oshxona AI)",
-  "welcome_message": "Mijoz /start bosganda chiqadigan samimiy va chiroyli salomlashish xabari",
-  "system_prompt": "AI uchun to'liq va mukammal ko'rsatma (xarakteri, qanday muloqot qilishi, mijozdan ma'lumot olish tartibi)"
-}}
-```"""
-
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}"
         payload = {
-            "contents": [{"role": "user", "parts": [{"text": prompt}]}]
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": 0.4,
+                "responseMimeType": "application/json"
+            }
         }
 
-        try:
-            async with httpx.AsyncClient(timeout=20.0) as client:
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            try:
                 res = await client.post(url, json=payload)
                 data = res.json()
-                if "candidates" in data:
-                    raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
-                    if "```json" in raw_text:
-                        json_str = raw_text.split("```json")[1].split("```")[0].strip()
-                    elif "```" in raw_text:
-                        json_str = raw_text.split("```")[1].split("```")[0].strip()
-                    else:
-                        json_str = raw_text.strip()
-                    return json.loads(json_str)
-        except Exception as e:
-            logger.error(f"Error enhancing prompt: {e}")
-
-        return {
-            "suggested_name": "Shaxsiy AI Operator",
-            "welcome_message": "Assalomu alaykum! Xizmatimizga xush kelibsiz. Sizga qanday yordam berishim mumkin?",
-            "system_prompt": f"Siz {business_description} bo'yicha mijozlarga professional maslahat beruvchi va buyurtmalarni qabul qiluvchi aqlli AI xodimisiz."
-        }
+                text = data["candidates"][0]["content"]["parts"][0]["text"]
+                return json.loads(text)
+            except Exception as e:
+                logger.error(f"Error generating AI prompt: {e}")
+                return {
+                    "name": "Maxsus AI Agent",
+                    "system_prompt": f"Siz {user_description} bo'yicha aqlli yordamchisiz.",
+                    "welcome_message": "Assalomu alaykum! Sizga qanday yordam bera olaman?"
+                }

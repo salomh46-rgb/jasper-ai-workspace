@@ -34,8 +34,13 @@ async def lifespan(app: FastAPI):
     await init_db()
     logger.info("✅ Ma'lumotlar bazasi initsializatsiya qilindi.")
     await start_master_bot()
+    from app.services.bot_manager import BotManager
+    await BotManager.start_all_agent_bots()
     yield
     await stop_master_bot()
+    from app.services.bot_manager import BotManager
+    for tok in list(BotManager._active_bot_tasks.keys()):
+        await BotManager.stop_bot(tok)
     logger.info("🛑 Jasper AI Workspace to'xtatildi.")
 
 app = FastAPI(
