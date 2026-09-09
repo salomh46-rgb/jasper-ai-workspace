@@ -31,7 +31,7 @@ export default function App() {
         window.Telegram.WebApp.expand();
       } else {
         // Mock initData for browser preview
-        initData = 'user=' + encodeURIComponent(JSON.stringify({ id: 12345678, first_name: 'Jasper', username: 'jasper_dev' }));
+        initData = "user=" + encodeURIComponent(JSON.stringify({ id: 12345678, first_name: "Jasper", username: "jasper_dev" }));
       }
 
       const authData = await api.loginViaTelegram(initData);

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Bot, Sparkles, User, RefreshCw } from 'lucide-react';
+import React from "react";
+import { Bot, RefreshCw } from "lucide-react";
 
-export default function Navbar({ user, stats, onRefresh }) {
+export default function Navbar({ user, onRefresh }) {
   return (
     <header className="sticky top-0 z-40 bg-tg-surface/90 backdrop-blur-md border-b border-tg-border px-4 py-3 flex items-center justify-between">
       <div className="flex items-center space-x-3">
@@ -30,10 +30,10 @@ export default function Navbar({ user, stats, onRefresh }) {
 
         <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-tg-surfaceHover border border-tg-border">
           <div className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">
-            {user?.full_name ? user.full_name[0] : 'J'}
+            {user?.full_name ? user.full_name[0] : "J"}
           </div>
           <span className="text-xs font-medium text-white max-w-[100px] truncate">
-            {user?.full_name || 'Tadbirkor'}
+            {user?.full_name || "Tadbirkor"}
           </span>
         </div>
       </div>

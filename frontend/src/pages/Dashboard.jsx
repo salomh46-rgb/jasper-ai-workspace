@@ -1,15 +1,15 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Bot, Users, MessageSquare, Plus, ArrowRight, CheckCircle, Sparkles, Building2, ShoppingBag, GraduationCap, Wrench } from 'lucide-react';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Bot, Users, MessageSquare, Plus, ArrowRight, Sparkles, Building2, ShoppingBag, GraduationCap, Wrench } from "lucide-react";
 
-export default function Dashboard({ stats, agents, leads, onSelectAgent }) {
+export default function Dashboard({ stats, agents, onSelectAgent }) {
   const navigate = useNavigate();
 
   const templates = [
-    { id: 'clinic', title: 'Stomatologiya & Klinika', icon: Building2, desc: 'Qabulga yozish, narxlar va maslahat', color: 'from-cyan-500 to-blue-600' },
-    { id: 'shop', title: 'Kiyim & Do'kon', icon: ShoppingBag, desc: 'Katalog, o'lchamlar va buyurtma', color: 'from-pink-500 to-rose-600' },
-    { id: 'education', title: 'O'quv Markazi', icon: GraduationCap, desc: 'Kurslar, narxlar va sinov darsi', color: 'from-amber-500 to-orange-600' },
-    { id: 'craftsman', title: 'Usta Bozor / Servis', icon: Wrench, desc: 'Ta'mirlash, usta chaqirish va diagnostika', color: 'from-emerald-500 to-teal-600' }
+    { id: "clinic", title: "Stomatologiya & Klinika", icon: Building2, desc: "Qabulga yozish, narxlar va maslahat", color: "from-cyan-500 to-blue-600" },
+    { id: "shop", title: "Kiyim & Do'kon", icon: ShoppingBag, desc: "Katalog, o'lchamlar va buyurtma", color: "from-pink-500 to-rose-600" },
+    { id: "education", title: "O'quv Markazi", icon: GraduationCap, desc: "Kurslar, narxlar va sinov darsi", color: "from-amber-500 to-orange-600" },
+    { id: "craftsman", title: "Usta Bozor / Servis", icon: Wrench, desc: "Ta'mirlash, usta chaqirish va diagnostika", color: "from-emerald-500 to-teal-600" }
   ];
 
   return (
@@ -29,14 +29,14 @@ export default function Dashboard({ stats, agents, leads, onSelectAgent }) {
           </p>
           <div className="pt-2 flex items-center space-x-3">
             <button
-              onClick={() => navigate('/agents/new')}
+              onClick={() => navigate("/agents/new")}
               className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition-all shadow-lg shadow-blue-600/30"
             >
               <Plus className="w-4 h-4" />
               <span>Yangi AI Agent Yaratish</span>
             </button>
             <button
-              onClick={() => navigate('/tester')}
+              onClick={() => navigate("/tester")}
               className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-tg-surfaceHover hover:bg-tg-border text-white text-sm transition-all"
             >
               <MessageSquare className="w-4 h-4 text-blue-400" />
@@ -57,7 +57,7 @@ export default function Dashboard({ stats, agents, leads, onSelectAgent }) {
           <div className="text-[10px] text-emerald-400 font-medium mt-1">● Faol holatda</div>
         </div>
 
-        <div className="bg-tg-surface border border-tg-border rounded-xl p-3.5 flex flex-col justify-between cursor-pointer hover:border-emerald-500/40 transition-all" onClick={() => navigate('/leads')}>
+        <div className="bg-tg-surface border border-tg-border rounded-xl p-3.5 flex flex-col justify-between cursor-pointer hover:border-emerald-500/40 transition-all" onClick={() => navigate("/leads")}>
           <div className="flex items-center justify-between text-tg-textSecondary mb-1">
             <span className="text-xs font-medium">Yangi Lidlar</span>
             <Users className="w-4 h-4 text-emerald-400" />
@@ -76,7 +76,7 @@ export default function Dashboard({ stats, agents, leads, onSelectAgent }) {
         </div>
       </div>
 
-      {/* Tayyor Shablonlar (One-click templates) */}
+      {/* Tayyor Shablonlar */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-base text-white">Tayyor Soha Shablonlari</h3>
@@ -88,10 +88,10 @@ export default function Dashboard({ stats, agents, leads, onSelectAgent }) {
             return (
               <div
                 key={tpl.id}
-                onClick={() => navigate(`/agents/new?category=${tpl.id}`)}
+                onClick={() => navigate("/agents/new?category=" + tpl.id)}
                 className="group relative overflow-hidden bg-tg-surface hover:bg-tg-surfaceHover border border-tg-border hover:border-blue-500/40 rounded-xl p-3.5 cursor-pointer transition-all duration-200"
               >
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-tr ${tpl.color} flex items-center justify-center mb-2.5 shadow-md`}>
+                <div className={"w-8 h-8 rounded-lg bg-gradient-to-tr " + tpl.color + " flex items-center justify-center mb-2.5 shadow-md"}>
                   <Icon className="w-4 h-4 text-white" />
                 </div>
                 <h4 className="font-semibold text-sm text-white group-hover:text-blue-400 transition-colors">{tpl.title}</h4>
@@ -110,7 +110,7 @@ export default function Dashboard({ stats, agents, leads, onSelectAgent }) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-base text-white">Mening AI Agentlarim</h3>
-          <button onClick={() => navigate('/agents')} className="text-xs text-blue-400 hover:underline">Barchasini ko'rish</button>
+          <button onClick={() => navigate("/agents")} className="text-xs text-blue-400 hover:underline">Barchasini ko'rish</button>
         </div>
 
         {agents && agents.length > 0 ? (
@@ -120,7 +120,7 @@ export default function Dashboard({ stats, agents, leads, onSelectAgent }) {
                 key={agent.id}
                 onClick={() => {
                   if (onSelectAgent) onSelectAgent(agent);
-                  navigate(`/agents/${agent.id}`);
+                  navigate("/agents/" + agent.id);
                 }}
                 className="bg-tg-surface hover:bg-tg-surfaceHover border border-tg-border rounded-xl p-3.5 flex items-center justify-between cursor-pointer transition-all"
               >
@@ -131,7 +131,7 @@ export default function Dashboard({ stats, agents, leads, onSelectAgent }) {
                   <div>
                     <h4 className="font-semibold text-sm text-white">{agent.name}</h4>
                     <p className="text-xs text-tg-textSecondary">
-                      {agent.company_name || 'Kompaniya'} • {agent.knowledge_count} ta bilim • {agent.leads_count} ta lid
+                      {agent.company_name || "Kompaniya"} • {agent.knowledge_count} ta bilim • {agent.leads_count} ta lid
                     </p>
                   </div>
                 </div>
@@ -149,7 +149,7 @@ export default function Dashboard({ stats, agents, leads, onSelectAgent }) {
             <Bot className="w-10 h-10 text-tg-textSecondary mx-auto opacity-50" />
             <p className="text-sm text-tg-textSecondary">Sizda hali faol agentlar yo'q.</p>
             <button
-              onClick={() => navigate('/agents/new')}
+              onClick={() => navigate("/agents/new")}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold"
             >
               Birinchi Agentni Yaratish

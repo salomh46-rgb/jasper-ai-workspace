@@ -1,13 +1,13 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Bot, Database, Users, MessageSquare } from 'lucide-react';
+import React from "react";
+import { NavLink } from "react-router-dom";
+import { LayoutDashboard, Bot, Users, MessageSquare } from "lucide-react";
 
 export default function BottomNav({ newLeadsCount = 0 }) {
   const navItems = [
-    { to: '/', label: 'Bosh sahifa', icon: LayoutDashboard },
-    { to: '/agents', label: 'Agentlar', icon: Bot },
-    { to: '/leads', label: 'Lidlar CRM', icon: Users, badge: newLeadsCount },
-    { to: '/tester', label: 'AI Test', icon: MessageSquare },
+    { to: "/", label: "Bosh sahifa", icon: LayoutDashboard },
+    { to: "/agents", label: "Agentlar", icon: Bot },
+    { to: "/leads", label: "Lidlar CRM", icon: Users, badge: newLeadsCount },
+    { to: "/tester", label: "AI Test", icon: MessageSquare },
   ];
 
   return (
@@ -18,10 +18,10 @@ export default function BottomNav({ newLeadsCount = 0 }) {
           <NavLink
             key={item.to}
             to={item.to}
-            className={({ isActive }) => `
-              flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all relative
-              ${isActive ? 'text-blue-400 font-semibold scale-105' : 'text-tg-textSecondary hover:text-white'}
-            `}
+            className={({ isActive }) =>
+              "flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all relative " +
+              (isActive ? "text-blue-400 font-semibold scale-105" : "text-tg-textSecondary hover:text-white")
+            }
           >
             <div className="relative">
               <Icon className="w-5 h-5 mb-0.5" />

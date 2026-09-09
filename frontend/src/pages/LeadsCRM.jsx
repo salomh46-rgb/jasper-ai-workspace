@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
-import { Users, Phone, Calendar, CheckCircle2, Clock, XCircle, Filter, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { api } from "../services/api";
+import { Users, Phone, Sparkles } from "lucide-react";
 
 export default function LeadsCRM() {
   const [leads, setLeads] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState("all");
 
   useEffect(() => {
     loadLeads();
@@ -13,14 +12,11 @@ export default function LeadsCRM() {
 
   const loadLeads = async () => {
     try {
-      setLoading(true);
-      const statusParam = selectedStatus === 'all' ? null : selectedStatus;
+      const statusParam = selectedStatus === "all" ? null : selectedStatus;
       const data = await api.getLeads(null, statusParam);
       setLeads(data);
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -29,17 +25,17 @@ export default function LeadsCRM() {
       await api.updateLeadStatus(leadId, newStatus);
       loadLeads();
     } catch (err) {
-      alert(err.message || 'Statusni yangilab bo'lmadi');
+      alert(err.message || "Statusni yangilab bo'lmadi");
     }
   };
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'new':
+      case "new":
         return <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Yangi</span>;
-      case 'in_progress':
+      case "in_progress":
         return <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30">Jarayonda</span>;
-      case 'completed':
+      case "completed":
         return <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-500/20 text-blue-400 border border-blue-500/30">Bajarildi</span>;
       default:
         return <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-tg-border text-tg-textSecondary">{status}</span>;
@@ -57,19 +53,19 @@ export default function LeadsCRM() {
       {/* Filter Tabs */}
       <div className="flex items-center space-x-1.5 overflow-x-auto pb-1">
         {[
-          { id: 'all', label: 'Barchasi' },
-          { id: 'new', label: 'Yangi' },
-          { id: 'in_progress', label: 'Jarayonda' },
-          { id: 'completed', label: 'Bajarildi' },
+          { id: "all", label: "Barchasi" },
+          { id: "new", label: "Yangi" },
+          { id: "in_progress", label: "Jarayonda" },
+          { id: "completed", label: "Bajarildi" },
         ].map(tab => (
           <button
             key={tab.id}
             onClick={() => setSelectedStatus(tab.id)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={"px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all " + (
               selectedStatus === tab.id
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-tg-surface text-tg-textSecondary hover:text-white border border-tg-border'
-            }`}
+                ? "bg-blue-600 text-white shadow-md"
+                : "bg-tg-surface text-tg-textSecondary hover:text-white border border-tg-border"
+            )}
           >
             {tab.label}
           </button>
@@ -84,17 +80,17 @@ export default function LeadsCRM() {
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center space-x-2">
-                    <h4 className="font-bold text-sm text-white">{lead.customer_name || 'Noma'lum Mijoz'}</h4>
+                    <h4 className="font-bold text-sm text-white">{lead.customer_name || "Noma'lum Mijoz"}</h4>
                     {getStatusBadge(lead.status)}
                   </div>
                   <p className="text-[11px] text-tg-textSecondary mt-0.5">
-                    🤖 Bot: <span className="text-blue-400">{lead.agent_name}</span> • {new Date(lead.created_at).toLocaleString('uz-UZ')}
+                    🤖 Bot: <span className="text-blue-400">{lead.agent_name}</span> • {new Date(lead.created_at).toLocaleString("uz-UZ")}
                   </p>
                 </div>
 
                 {lead.customer_phone && (
                   <a
-                    href={`tel:${lead.customer_phone}`}
+                    href={"tel:" + lead.customer_phone}
                     className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition-all"
                   >
                     <Phone className="w-3.5 h-3.5" />
@@ -114,17 +110,17 @@ export default function LeadsCRM() {
 
               {/* Status Actions */}
               <div className="flex items-center justify-end space-x-2 pt-1 border-t border-tg-border/50">
-                {lead.status === 'new' && (
+                {lead.status === "new" && (
                   <button
-                    onClick={() => handleStatusChange(lead.id, 'in_progress')}
+                    onClick={() => handleStatusChange(lead.id, "in_progress")}
                     className="px-2.5 py-1 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[11px] font-semibold hover:bg-amber-500/30"
                   >
                     Jarayonga olish
                   </button>
                 )}
-                {lead.status !== 'completed' && (
+                {lead.status !== "completed" && (
                   <button
-                    onClick={() => handleStatusChange(lead.id, 'completed')}
+                    onClick={() => handleStatusChange(lead.id, "completed")}
                     className="px-2.5 py-1 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[11px] font-semibold hover:bg-blue-500/30"
                   >
                     Bajarildi deb belgilash

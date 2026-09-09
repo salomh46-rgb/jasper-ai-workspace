@@ -1,31 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { api } from '../services/api';
-import { Bot, Save, ArrowLeft, Sparkles, Building2, ShoppingBag, GraduationCap, Wrench, Key, Check } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { api } from "../services/api";
+import { Save, ArrowLeft, Sparkles, Building2, ShoppingBag, GraduationCap, Wrench, Key } from "lucide-react";
 
 export default function BotConstructor() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const initialCategory = searchParams.get('category') || 'clinic';
+  const initialCategory = searchParams.get("category") || "clinic";
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [templates, setTemplates] = useState({});
   const [formData, setFormData] = useState({
-    name: '',
+    name: "",
     category: initialCategory,
-    bot_token: '',
-    company_name: '',
-    phone_number: '+998 ',
-    address: '',
-    working_hours: '09:00 - 18:00 (Dush-Shan)',
-    system_prompt: '',
-    welcome_message: ''
+    bot_token: "",
+    company_name: "",
+    phone_number: "+998 ",
+    address: "",
+    working_hours: "09:00 - 18:00 (Dush-Shan)",
+    system_prompt: "",
+    welcome_message: ""
   });
 
   useEffect(() => {
     loadTemplates();
-    if (id && id !== 'new') {
+    if (id && id !== "new") {
       loadAgent(id);
     }
   }, [id]);
@@ -34,7 +34,7 @@ export default function BotConstructor() {
     try {
       const data = await api.getTemplates();
       setTemplates(data);
-      if (!id || id === 'new') {
+      if (!id || id === "new") {
         const tpl = data[initialCategory];
         if (tpl) {
           setFormData(prev => ({
@@ -55,18 +55,18 @@ export default function BotConstructor() {
       setLoading(true);
       const agent = await api.getAgent(agentId);
       setFormData({
-        name: agent.name || '',
-        category: agent.category || 'clinic',
-        bot_token: agent.bot_token || '',
-        company_name: agent.company_name || '',
-        phone_number: agent.phone_number || '',
-        address: agent.address || '',
-        working_hours: agent.working_hours || '',
-        system_prompt: agent.system_prompt || '',
-        welcome_message: agent.welcome_message || ''
+        name: agent.name || "",
+        category: agent.category || "clinic",
+        bot_token: agent.bot_token || "",
+        company_name: agent.company_name || "",
+        phone_number: agent.phone_number || "",
+        address: agent.address || "",
+        working_hours: agent.working_hours || "",
+        system_prompt: agent.system_prompt || "",
+        welcome_message: agent.welcome_message || ""
       });
     } catch (err) {
-      alert('Agentni yuklashda xatolik yuz berdi');
+      alert("Agentni yuklashda xatolik yuz berdi");
     } finally {
       setLoading(false);
     }
@@ -86,24 +86,24 @@ export default function BotConstructor() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.bot_token) {
-      alert('Iltimos, @BotFather dan olingan Bot Tokenni kiriting!');
+      alert("Iltimos, @BotFather dan olingan Bot Tokenni kiriting!");
       return;
     }
 
     try {
       setLoading(true);
-      if (id && id !== 'new') {
+      if (id && id !== "new") {
         await api.updateAgent(id, formData);
-        alert('Agent muvaffaqiyatli yangilandi!');
+        alert("Agent muvaffaqiyatli yangilandi!");
       } else {
         const res = await api.createAgent(formData);
-        alert('Agent muvaffaqiyatli yaratildi!');
-        navigate(`/agents/${res.agent_id}`);
+        alert("Agent muvaffaqiyatli yaratildi!");
+        navigate("/agents/" + res.agent_id);
         return;
       }
-      navigate('/agents');
+      navigate("/agents");
     } catch (err) {
-      alert(err.message || 'Xatolik yuz berdi');
+      alert(err.message || "Xatolik yuz berdi");
     } finally {
       setLoading(false);
     }
@@ -118,7 +118,7 @@ export default function BotConstructor() {
         </button>
         <div>
           <h2 className="text-lg font-bold text-white">
-            {id && id !== 'new' ? 'Agentni Tahrirlash' : 'Yangi AI Agent Yaratish'}
+            {id && id !== "new" ? "Agentni Tahrirlash" : "Yangi AI Agent Yaratish"}
           </h2>
           <p className="text-xs text-tg-textSecondary">Bot shablonini tanlang va sozlang</p>
         </div>
@@ -132,10 +132,10 @@ export default function BotConstructor() {
           </label>
           <div className="grid grid-cols-2 gap-2.5">
             {[
-              { id: 'clinic', name: 'Klinika / Stomatologiya', icon: Building2 },
-              { id: 'shop', name: 'Kiyim / Do'kon', icon: ShoppingBag },
-              { id: 'education', name: 'O'quv Markazi', icon: GraduationCap },
-              { id: 'craftsman', name: 'Usta / Servis', icon: Wrench },
+              { id: "clinic", name: "Klinika / Stomatologiya", icon: Building2 },
+              { id: "shop", name: "Kiyim / Do'kon", icon: ShoppingBag },
+              { id: "education", name: "O'quv Markazi", icon: GraduationCap },
+              { id: "craftsman", name: "Usta / Servis", icon: Wrench },
             ].map(item => {
               const Icon = item.icon;
               const isSelected = formData.category === item.id;
@@ -143,13 +143,13 @@ export default function BotConstructor() {
                 <div
                   key={item.id}
                   onClick={() => handleCategoryChange(item.id)}
-                  className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center space-x-2.5 ${
+                  className={"p-3 rounded-xl border cursor-pointer transition-all flex items-center space-x-2.5 " + (
                     isSelected 
-                      ? 'bg-blue-600/20 border-blue-500 text-white font-semibold' 
-                      : 'bg-tg-surface border-tg-border text-tg-textSecondary hover:text-white'
-                  }`}
+                      ? "bg-blue-600/20 border-blue-500 text-white font-semibold" 
+                      : "bg-tg-surface border-tg-border text-tg-textSecondary hover:text-white"
+                  )}
                 >
-                  <Icon className={`w-4 h-4 ${isSelected ? 'text-blue-400' : ''}`} />
+                  <Icon className={"w-4 h-4 " + (isSelected ? "text-blue-400" : "")} />
                   <span className="text-xs">{item.name}</span>
                 </div>
               );
@@ -252,7 +252,7 @@ export default function BotConstructor() {
             <label className="text-xs font-semibold text-white">AI Xarakteri va Asosiy Prompti</label>
           </div>
           <textarea
-            rows="4"
+            rows={4}
             value={formData.system_prompt}
             onChange={e => setFormData({ ...formData, system_prompt: e.target.value })}
             className="w-full bg-tg-bg border border-tg-border rounded-xl p-3 text-xs text-white leading-relaxed focus:outline-none focus:border-blue-500 font-mono"
@@ -266,7 +266,7 @@ export default function BotConstructor() {
           className="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-xl shadow-blue-600/30 flex items-center justify-center space-x-2 transition-all disabled:opacity-50"
         >
           <Save className="w-4 h-4" />
-          <span>{loading ? 'Saqlanmoqda...' : 'Agentni Saqlash va Faollashtirish'}</span>
+          <span>{loading ? "Saqlanmoqda..." : "Agentni Saqlash va Faollashtirish"}</span>
         </button>
       </form>
     </div>

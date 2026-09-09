@@ -1,19 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
-import { Database, Plus, Trash2, ArrowLeft, BookOpen, Tag } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { api } from "../services/api";
+import { Plus, Trash2, ArrowLeft, BookOpen } from "lucide-react";
 
 export default function KnowledgeHub() {
   const { agentId } = useParams();
   const navigate = useNavigate();
   
   const [knowledge, setKnowledge] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newItem, setNewItem] = useState({
-    title: '',
-    content: '',
-    category: 'service'
+    title: "",
+    content: "",
+    category: "service"
   });
 
   useEffect(() => {
@@ -22,13 +21,10 @@ export default function KnowledgeHub() {
 
   const loadKnowledge = async () => {
     try {
-      setLoading(true);
       const data = await api.getKnowledge(agentId);
       setKnowledge(data);
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -38,20 +34,20 @@ export default function KnowledgeHub() {
     try {
       await api.addKnowledge({ agent_id: Number(agentId), ...newItem });
       setShowAddModal(false);
-      setNewItem({ title: '', content: '', category: 'service' });
+      setNewItem({ title: "", content: "", category: "service" });
       loadKnowledge();
     } catch (err) {
-      alert(err.message || 'Xatolik yuz berdi');
+      alert(err.message || "Xatolik yuz berdi");
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Ushbu ma'lumotni o'chirmoqchimisiz?')) return;
+    if (!confirm("Ushbu ma'lumotni o'chirmoqchimisiz?")) return;
     try {
       await api.deleteKnowledge(id);
       loadKnowledge();
     } catch (err) {
-      alert(err.message || 'Xatolik');
+      alert(err.message || "Xatolik");
     }
   };
 
@@ -145,7 +141,7 @@ export default function KnowledgeHub() {
               <div className="space-y-1">
                 <label className="text-xs text-tg-textSecondary">Batafsil matn / faktlar</label>
                 <textarea
-                  rows="5"
+                  rows={5}
                   required
                   value={newItem.content}
                   onChange={e => setNewItem({ ...newItem, content: e.target.value })}

@@ -11,7 +11,7 @@ class ApiService {
   }
 
   getHeaders() {
-    const headers = { 'Content-Type': 'application/json' };
+    const headers = { "Content-Type": "application/json" };
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
