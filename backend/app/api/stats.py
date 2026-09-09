@@ -8,6 +8,8 @@ from app.models.agent import Agent
 from app.models.lead import Lead
 from app.models.conversation import Conversation, ChatMessage
 
+from datetime import datetime
+
 router = APIRouter(prefix="/stats", tags=["Stats"])
 
 @router.get("/overview")
@@ -33,6 +35,6 @@ async def get_overview(db: AsyncSession = Depends(get_db), current_user: User = 
         "total_leads": total_leads,
         "new_leads": new_leads,
         "total_conversations": total_conversations,
-        "ai_status": "Online (Gemini 2.5 Flash)",
-        "server_time": func.now()
+        "ai_status": "Online (Gemini Flash Multilingual)",
+        "server_time": datetime.utcnow().isoformat()
     }
