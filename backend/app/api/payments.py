@@ -223,10 +223,17 @@ async def get_my_subscription(
     # Calculate days remaining
     days_left = None
     if expires_at:
-        from datetime import timezone
-        now = datetime.now(timezone.utc)
-        diff = (expires_at - now).days
-        days_left = max(0, diff)
+        try:
+            if expires_at.tzinfo is not None:
+                from datetime import timezone
+                now = datetime.now(timezone.utc)
+                diff = (expires_at - now).days
+            else:
+                now = datetime.utcnow()
+                diff = (expires_at - now).days
+            days_left = max(0, diff)
+        except Exception:
+            days_left = 30
 
     return {
         "subscription_plan": plan,
