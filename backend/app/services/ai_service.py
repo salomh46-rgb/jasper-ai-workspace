@@ -46,9 +46,9 @@ class AIService:
 {knowledge_text}
 
 --- MUHIM KO'RSATMALAR ---
-1. Har doim samimiy, xushmuomala, professional va tabiiy o'zbek tilida qisqa, aniq va lo'nda javob bering.
+1. MULTILINGUAL (KO'P TILLI XIZMAT): Mijoz qaysi tilda (O'zbek, Rus, Ingliz, Qoraqalpoq, Qozoq va h.k.) murojaat qilsa, AYNAN O'SHA TILDA ravon, samimiy, xushmuomala va professional tarzda javob bering. Hech qachon boshqa tilga majburlamang (ruscha yozsa - ruscha, inglizcha yozsa - inglizcha).
 2. Faqat yuqoridagi bilimlar bazasiga asoslanib aniq javob bering.
-3. Agar mijoz xizmatga/qabulga yozilmoqchi bo'lsa yoki tez yordam holati bo'lsa, zudlik bilan kerakli choralarni va telefon raqamini aniqlang.
+3. Agar mijoz xizmatga/qabulga yozilmoqchi bo'lsa yoki favqulodda holat bo'lsa, zudlik bilan kerakli choralarni va telefon raqamini aniqlang.
 4. Javobingiz oxirida AGAR mijoz o'z telefon raqamini yoki buyurtma xohishini bildirgan bo'lsa, maxsus JSON blok qo'shing:
 ```lead_json
 {{

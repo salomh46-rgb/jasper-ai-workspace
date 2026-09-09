@@ -134,7 +134,11 @@ class BotManager:
                 await db.flush()
 
             # 3. Check for operator takeover trigger keywords or active paused state
-            operator_keywords = ["operator", "inson", "odam", "admin", "menejer", "mutaxassis", "jonli suhbat"]
+            operator_keywords = [
+                "operator", "inson", "odam", "admin", "menejer", "mutaxassis", "jonli suhbat",
+                "оператор", "человек", "админ", "менеджер", "живой человек", "помощь человека",
+                "human", "live agent", "real person", "support", "talk to human"
+            ]
             is_requesting_human = any(k in message_text.lower() for k in operator_keywords)
 
             if conversation.is_paused_for_human or is_requesting_human:
