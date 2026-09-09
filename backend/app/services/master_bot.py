@@ -18,10 +18,15 @@ master_dp = Dispatcher()
 _master_bot_instance = None
 _master_polling_task = None
 
+import os
+
 def get_webapp_url() -> str:
     if settings.WEBHOOK_BASE_URL:
-        return settings.WEBHOOK_BASE_URL
-    return "https://b12e0e00d73ef6.lhr.life"
+        return settings.WEBHOOK_BASE_URL.rstrip('/')
+    railway_domain = os.environ.get("RAILWAY_PUBLIC_DOMAIN")
+    if railway_domain:
+        return f"https://{railway_domain}"
+    return "https://jasper-ai-workspace-production.up.railway.app"
 
 @master_dp.message(CommandStart())
 async def cmd_start(message: types.Message):
@@ -213,17 +218,23 @@ async def start_master_bot():
 
     try:
         _master_bot_instance = Bot(token=settings.MASTER_BOT_TOKEN)
+        try:
+            await _master_bot_instance.delete_webhook(drop_pending_updates=True)
+            logger.info("✅ Master Bot webhook tozalandi.")
+        except Exception as e:
+            logger.warning(f"Webhook tozalashda xatolik: {e}")
+
         webapp_url = get_webapp_url()
         try:
             await _master_bot_instance.set_chat_menu_button(
                 menu_button=MenuButtonWebApp(text="🚀 AI Workspace", web_app=WebAppInfo(url=webapp_url))
             )
-            logger.info("✅ Master Bot Menu Button o'rnatildi!")
+            logger.info(f"✅ Master Bot Menu Button o'rnatildi: {webapp_url}")
         except Exception as e:
             logger.warning(f"Menu button o'rnatishda xatolik: {e}")
 
         logger.info("🤖 Master Bot Telegramda tinglashni boshladi (Polling)...")
-        _master_polling_task = asyncio.create_task(master_dp.start_polling(_master_bot_instance))
+        _master_polling_task = asyncio.create_task(master_dp.start_polling(_master_bot_instance, drop_pending_updates=True))
     except Exception as e:
         logger.error(f"Master Botni ishga tushirishda xatolik: {e}")
 

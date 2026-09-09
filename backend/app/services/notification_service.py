@@ -17,10 +17,10 @@ class NotificationService:
 
     @classmethod
     def _get_webapp_url(cls, subpath: str = "") -> str:
-        base = settings.WEBHOOK_BASE_URL or "https://b12e0e00d73ef6.lhr.life"
+        base = settings.WEBHOOK_BASE_URL or (f"https://{os.environ.get('RAILWAY_PUBLIC_DOMAIN')}" if os.environ.get('RAILWAY_PUBLIC_DOMAIN') else "https://jasper-ai-workspace-production.up.railway.app")
         if subpath:
             return f"{base.rstrip('/')}#{subpath}"
-        return base
+        return base.rstrip('/')
 
     @classmethod
     async def notify_new_lead(
