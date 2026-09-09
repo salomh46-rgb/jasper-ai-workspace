@@ -3,7 +3,8 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
 import { 
   Save, ArrowLeft, Sparkles, Building2, ShoppingBag, 
-  GraduationCap, Wrench, Key, BookOpen, Check, Wand2, X, Trash2 
+  GraduationCap, Wrench, Key, BookOpen, Check, Wand2, X, Trash2,
+  Activity, Utensils, Home
 } from "lucide-react";
 
 export default function BotConstructor() {
@@ -38,10 +39,13 @@ export default function BotConstructor() {
   });
 
   const categories = [
+    { id: "emergency", label: "Tez Yordam (103)", icon: Activity },
     { id: "clinic", label: "Klinika", icon: Building2 },
     { id: "shop", label: "Do‘kon", icon: ShoppingBag },
     { id: "education", label: "O‘quv Markaz", icon: GraduationCap },
-    { id: "craftsman", label: "Servis", icon: Wrench },
+    { id: "restaurant", label: "Restoran & Kafe", icon: Utensils },
+    { id: "craftsman", label: "Usta & Servis", icon: Wrench },
+    { id: "realestate", label: "Ko‘chmas Mulk", icon: Home },
     { id: "custom", label: "Maxsus / Oʻz Sohangiz", icon: Wand2 },
   ];
 
