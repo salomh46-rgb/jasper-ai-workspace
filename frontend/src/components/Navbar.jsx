@@ -1,10 +1,12 @@
 import React from "react";
-import { Bot, RefreshCw, Zap, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Bot, RefreshCw, Zap, Sparkles, Star } from "lucide-react";
 
 export default function Navbar({ user, stats, onRefresh }) {
+  const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-40 bg-[#07080D]/80 backdrop-blur-xl border-b border-white/[0.07] px-4 py-3 flex items-center justify-between">
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate("/")}>
         <div className="relative group cursor-pointer">
           <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl blur-sm opacity-60 group-hover:opacity-100 transition duration-300" />
           <div className="relative w-10 h-10 rounded-xl bg-[#0E121B] border border-white/10 flex items-center justify-center shadow-lg">
@@ -25,12 +27,20 @@ export default function Navbar({ user, stats, onRefresh }) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
             </span>
-            <p className="text-[11px] text-slate-400 font-medium">Gemini 3.6 Flash • Onlayn</p>
+            <p className="text-[11px] text-slate-400 font-medium">Multilingual AI • 24/7</p>
           </div>
         </div>
       </div>
 
       <div className="flex items-center space-x-2">
+        <button
+          onClick={() => navigate("/pricing")}
+          className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold transition-all active:scale-95"
+        >
+          <Star className="w-3.5 h-3.5 fill-amber-400" />
+          <span>Tariflar</span>
+        </button>
+
         <button 
           onClick={onRefresh}
           className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 border border-white/[0.06] text-slate-400 hover:text-white transition-all duration-150"

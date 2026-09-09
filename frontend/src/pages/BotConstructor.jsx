@@ -21,6 +21,7 @@ export default function BotConstructor() {
   const [aiPromptDesc, setAiPromptDesc] = useState("");
   const [generatingPrompt, setGeneratingPrompt] = useState(false);
   const [customCategoryName, setCustomCategoryName] = useState("");
+  const [showBotFatherGuide, setShowBotFatherGuide] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -336,8 +337,27 @@ export default function BotConstructor() {
               <Key className="w-3.5 h-3.5" />
               <span>Telegram Bot Tokeni (Ixtiyoriy)</span>
             </h3>
-            <span className="text-[11px] text-slate-400">@BotFather orqali olinadi</span>
+            <button
+              type="button"
+              onClick={() => setShowBotFatherGuide(!showBotFatherGuide)}
+              className="text-[11px] text-amber-400 hover:text-amber-300 font-semibold underline flex items-center gap-1 cursor-pointer"
+            >
+              <span>{showBotFatherGuide ? "Yo'riqnomani yopish ▲" : "💡 Token olish yo'riqnomasi ▼"}</span>
+            </button>
           </div>
+
+          {showBotFatherGuide && (
+            <div className="p-4 rounded-xl bg-amber-500/[0.07] border border-amber-500/20 space-y-2.5 text-xs text-amber-200/90 animate-fade-in">
+              <p className="font-bold text-amber-300">1 daqiqada Telegram Bot yaratish va Token olish:</p>
+              <ol className="list-decimal list-inside space-y-1 text-slate-300">
+                <li>Telegramda rasmiy <a href="https://t.me/BotFather" target="_blank" rel="noreferrer" className="text-amber-400 font-semibold underline">@BotFather</a> botiga kiring.</li>
+                <li><code className="px-1.5 py-0.5 rounded bg-black/40 text-amber-300 font-mono">/newbot</code> buyrug'ini yuboring.</li>
+                <li>Botingiz nomini kiriting (Masalan: <span className="text-white">Mening Do'konim</span>).</li>
+                <li>Botingiz uchun username kiriting (oxiri <span className="text-white">_bot</span> bilan tugashi shart, masalan: <span className="text-white">mening_dokonim_ai_bot</span>).</li>
+                <li>BotFather sizga <span className="text-emerald-400 font-semibold">HTTP API Token</span> beradi (Masalan: <code className="px-1 bg-black/40 text-emerald-300 font-mono text-[10px]">8732339175:AAFi9X...</code>). Uni nusxalab quyidagi maydonga joylang!</li>
+              </ol>
+            </div>
+          )}
 
           <input
             type="text"

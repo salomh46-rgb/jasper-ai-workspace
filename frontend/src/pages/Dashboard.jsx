@@ -132,7 +132,7 @@ export default function Dashboard({ stats, agents: initialAgents }) {
           <div className="flex items-center justify-between">
             <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-400 text-xs font-semibold tracking-wide">
               <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-              <span>Google Gemini 3.6 Flash Bilan Kuchaytirilgan</span>
+              <span>Google Gemini Flash • Multilingual AI (UZ / RU / EN)</span>
             </div>
             <div className="hidden sm:flex items-center space-x-1.5 text-xs text-slate-400">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
@@ -142,10 +142,10 @@ export default function Dashboard({ stats, agents: initialAgents }) {
 
           <div>
             <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-              Telegram Biznesingiz Uchun Aqlli AI Agentlar
+              Telegram Biznesingiz Uchun Ko'p Tilli Aqlli AI Agentlar
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-xl leading-relaxed">
-              Mijozlaringiz bilan 24/7 o‘zbek tilida tabiiy suhbatlashuvchi, buyurtma oluvchi va CRM ga lid yig‘uvchi mustaqil AI operatorlaringiz.
+              Mijozlaringiz bilan O'zbek, Rus va Ingliz (UZ/RU/EN) tillarida 24/7 tabiiy suhbatlashuvchi, audio va matnli xabarlarni tushunuvchi, buyurtma oluvchi va CRM ga lid yig'uvchi AI operatorlaringiz.
             </p>
           </div>
 
@@ -163,6 +163,13 @@ export default function Dashboard({ stats, agents: initialAgents }) {
             >
               <Play className="w-3.5 h-3.5 text-emerald-400" />
               <span>AI Ovoz & Sinov</span>
+            </button>
+            <button
+              onClick={() => navigate("/pricing")}
+              className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/40 text-amber-300 font-semibold text-xs sm:text-sm backdrop-blur-md transition-all duration-150"
+            >
+              <span className="text-amber-400">⭐</span>
+              <span>Tariflar & Obuna</span>
             </button>
           </div>
         </div>
