@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     
     # Gemini AI
     GEMINI_API_KEY: Optional[str] = "YOUR_GEMINI_API_KEY_HERE"
-    GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_MODEL: str = "gemini-flash-lite-latest"
     
     # Master Bot for Telegram Mini App and Alerts
     MASTER_BOT_TOKEN: Optional[str] = None

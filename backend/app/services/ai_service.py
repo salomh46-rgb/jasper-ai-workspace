@@ -79,7 +79,10 @@ Agar hali lid shakllanmagan bo'lsa, `lead_json` blokini qo'shmang."""
                 "lead_data": None
             }
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{settings.GEMINI_MODEL}:generateContent?key={api_key}"
+        candidate_models = [settings.GEMINI_MODEL, "gemini-flash-lite-latest", "gemini-3.6-flash", "gemini-flash-latest"]
+        # Remove duplicates while preserving order
+        candidate_models = list(dict.fromkeys([m for m in candidate_models if m]))
+
         payload = {
             "contents": contents,
             "systemInstruction": {
@@ -91,40 +94,41 @@ Agar hali lid shakllanmagan bo'lsa, `lead_json` blokini qo'shmang."""
             }
         }
 
-        try:
-            async with httpx.AsyncClient(timeout=25.0) as client:
-                res = await client.post(url, json=payload)
-                data = res.json()
-                
-                if "candidates" in data and len(data["candidates"]) > 0:
-                    raw_reply = data["candidates"][0]["content"]["parts"][0]["text"]
+        async with httpx.AsyncClient(timeout=25.0) as client:
+            for model_name in candidate_models:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+                try:
+                    res = await client.post(url, json=payload)
+                    data = res.json()
                     
-                    # Parse lead_json if generated
-                    lead_data = None
-                    if "```lead_json" in raw_reply:
-                        parts = raw_reply.split("```lead_json")
-                        clean_reply = parts[0].strip()
-                        json_str = parts[1].split("```")[0].strip()
-                        try:
-                            lead_data = json.loads(json_str)
-                        except Exception:
-                            pass
+                    if "candidates" in data and len(data["candidates"]) > 0:
+                        raw_reply = data["candidates"][0]["content"]["parts"][0]["text"]
+                        
+                        # Parse lead_json if generated
+                        lead_data = None
+                        if "```lead_json" in raw_reply:
+                            parts = raw_reply.split("```lead_json")
+                            clean_reply = parts[0].strip()
+                            json_str = parts[1].split("```")[0].strip()
+                            try:
+                                lead_data = json.loads(json_str)
+                            except Exception:
+                                pass
+                        else:
+                            clean_reply = raw_reply.strip()
+                        
+                        return {
+                            "reply": clean_reply,
+                            "lead_data": lead_data
+                        }
                     else:
-                        clean_reply = raw_reply.strip()
-                    
-                    return {
-                        "reply": clean_reply,
-                        "lead_data": lead_data
-                    }
-                else:
-                    logger.error(f"Gemini API error response: {data}")
-                    return {
-                        "reply": "Kechirasiz, hozirda javob berishda texnik nosozlik yuz berdi. Tez orada javob beramiz!",
-                        "lead_data": None
-                    }
-        except Exception as e:
-            logger.error(f"Error calling Gemini API: {e}")
-            return {
-                "reply": "Assalomu alaykum! Xabaringiz yetib keldi. Tez orada operatorimiz siz bilan bog'lanadi.",
-                "lead_data": None
-            }
+                        logger.warning(f"Gemini API error on model {model_name}: {data}. Trying fallback...")
+                        continue
+                except Exception as e:
+                    logger.error(f"Error calling model {model_name}: {e}")
+                    continue
+
+        return {
+            "reply": "Assalomu alaykum! Xabaringiz yetib keldi. Tez orada operatorimiz siz bilan bog'lanadi.",
+            "lead_data": None
+        }
