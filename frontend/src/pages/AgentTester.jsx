@@ -125,7 +125,7 @@ export default function AgentTester({ agents }) {
         reader.readAsDataURL(audioBlob);
         reader.onloadend = async () => {
           const base64Audio = reader.result.split(",")[1];
-          setMessages(prev => [...prev, { sender: "customer", text: "🎙️ [Ovozli xabar yuborildi]" }]);
+          setMessages(prev => [...prev, { sender: "customer", text: "🎙️ " + t("voice_msg_sent") }]);
           try {
             setLoading(true);
             const res = await api.testAgent(selectedAgentId, null, base64Audio, "audio/ogg");
@@ -140,7 +140,7 @@ export default function AgentTester({ agents }) {
           } catch (err) {
             setMessages(prev => [
               ...prev,
-              { sender: "ai", text: "Ovozni tushunishda xatolik: " + err.message }
+              { sender: "ai", text: t("voice_msg_error") + " " + err.message }
             ]);
           } finally {
             setLoading(false);

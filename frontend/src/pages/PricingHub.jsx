@@ -247,7 +247,7 @@ export default function PricingHub() {
           <div className="relative w-full max-w-lg rounded-3xl bg-[#0E121B] border border-white/10 p-6 sm:p-8 space-y-6 shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
               <div>
-                <h3 className="font-bold text-lg text-white">{selectedPlan.name} Obunasi</h3>
+                <h3 className="font-bold text-lg text-white">{selectedPlan.name} {t("pricing_sub_title")}</h3>
                 <p className="text-xs text-blue-400 font-semibold">{selectedPlan.price} so'm / oy</p>
               </div>
               <button
@@ -272,7 +272,7 @@ export default function PricingHub() {
                     }`}
                   >
                     <CreditCard className="w-4 h-4" />
-                    <span>Karta (Click/Payme)</span>
+                    <span>{t("pricing_pay_card")}</span>
                   </button>
 
                   <button
@@ -285,21 +285,21 @@ export default function PricingHub() {
                     }`}
                   >
                     <Star className="w-4 h-4" />
-                    <span>Telegram Stars</span>
+                    <span>{t("pricing_stars_title")}</span>
                   </button>
                 </div>
 
                 {paymentMethod === "card" ? (
                   <div className="p-4 rounded-2xl bg-[#07080D] border border-white/[0.08] space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-400">To'lov uchun karta raqami:</span>
+                      <span className="text-xs text-slate-400">{t("pricing_card_label")}</span>
                       <button
                         type="button"
                         onClick={copyCard}
                         className="text-[11px] text-blue-400 hover:underline flex items-center gap-1"
                       >
                         {copiedCard ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                        <span>{copiedCard ? "Nusxalandi!" : "Nusxalash"}</span>
+                        <span>{copiedCard ? t("pricing_copied") : t("pricing_copy")}</span>
                       </button>
                     </div>
 
@@ -311,28 +311,28 @@ export default function PricingHub() {
                 ) : (
                   <div className="p-4 rounded-2xl bg-[#07080D] border border-amber-500/20 text-center space-y-2">
                     <Star className="w-8 h-8 text-amber-400 mx-auto animate-bounce" />
-                    <h5 className="font-bold text-xs text-white">Telegram Stars orqali to'lash</h5>
+                    <h5 className="font-bold text-xs text-white">{t("pricing_stars_title")}</h5>
                     <p className="text-[11px] text-slate-400">
-                      Telegram botingiz ichida 1 bosishda to'lov qilasiz.
+                      {t("pricing_stars_desc")}
                     </p>
                   </div>
                 )}
 
                 <div className="space-y-3 pt-2">
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-300">Ismingiz yoki Telegram Username</label>
+                    <label className="text-xs font-medium text-slate-300">{t("pricing_name_label")}</label>
                     <input
                       type="text"
                       required
                       value={senderName}
                       onChange={(e) => setSenderName(e.target.value)}
-                      placeholder="Masalan: @jasper_admin yoki Javohir"
+                      placeholder={t("pricing_name_placeholder")}
                       className="w-full bg-[#07080D] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-blue-500"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-300">Bog'lanish uchun telefon</label>
+                    <label className="text-xs font-medium text-slate-300">{t("pricing_phone_label")}</label>
                     <input
                       type="text"
                       required
@@ -350,10 +350,10 @@ export default function PricingHub() {
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 disabled:opacity-50 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/30 active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
                   {submitting ? (
-                    <span>So'rov yuborilmoqda...</span>
+                    <span>{t("pricing_submitting")}</span>
                   ) : (
                     <>
-                      <span>To'lovni Tasdiqlash & Faollashtirish</span>
+                      <span>{t("pricing_btn_confirm")}</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
@@ -365,9 +365,9 @@ export default function PricingHub() {
                   <Check className="w-8 h-8" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-lg text-white">So'rovingiz Qabul Qilindi!</h4>
+                  <h4 className="font-bold text-lg text-white">{t("pricing_success_title")}</h4>
                   <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                    To'lovingiz haqida adminga xabar yuborildi. {selectedPlan.name} tarifingiz 5 daqiqa ichida faollashtiriladi!
+                    {t("pricing_success_desc_1")} {selectedPlan.name} {t("pricing_success_desc_2")}
                   </p>
                 </div>
 
@@ -379,14 +379,14 @@ export default function PricingHub() {
                     className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-blue-500/30"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    <span>Telegramda Chekni Yuborish (@{adminUsername})</span>
+                    <span>{t("pricing_send_receipt")} (@{adminUsername})</span>
                   </a>
 
                   <button
                     onClick={() => setShowConfirmModal(false)}
                     className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition-all"
                   >
-                    Yopish
+                    {t("close")}
                   </button>
                 </div>
               </div>

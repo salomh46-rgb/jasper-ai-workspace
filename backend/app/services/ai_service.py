@@ -45,10 +45,14 @@ class AIService:
 {payment_info}
 {knowledge_text}
 
---- MUHIM KO'RSATMALAR ---
-1. MULTILINGUAL (KO'P TILLI XIZMAT): Mijoz qaysi tilda (O'zbek, Rus, Ingliz, Qoraqalpoq, Qozoq va h.k.) murojaat qilsa, AYNAN O'SHA TILDA ravon, samimiy, xushmuomala va professional tarzda javob bering. Hech qachon boshqa tilga majburlamang (ruscha yozsa - ruscha, inglizcha yozsa - inglizcha).
-2. Faqat yuqoridagi bilimlar bazasiga asoslanib aniq javob bering.
-3. Agar mijoz xizmatga/qabulga yozilmoqchi bo'lsa yoki favqulodda holat bo'lsa, zudlik bilan kerakli choralarni va telefon raqamini aniqlang.
+--- QAT'IY VA MUHIM KO'RSATMALAR (CRITICAL MULTILINGUAL RULES) ---
+1. TILNI AVTOMATIK MOSLASHTIRISH (STRICT LANGUAGE MATCHING):
+   - Foydalanuvchi / Mijoz sizga qaysi tilda murojaat qilsa (yoki gapirsa), SIZ HAM 100% AYNAN O'SHA TILDA (Rus, Ingliz yoki O'zbek) javob bering!
+   - Agar mijoz Rus tilida yozsa yoki gapirsa ("У меня боль в ноге", "Здравствуйте", "Сколько стоит?") -> BARCHA JAVOBINGIZNI FAQAT VA FAQAT SOF RUS TILIDA BERING! Hech qanday o'zbekcha so'z aralashtirmang!
+   - Agar mijoz Ingliz tilida yozsa yoki gapirsa ("I have pain in my leg", "Hello", "How much?") -> BARCHA JAVOBINGIZNI FAQAT VA FAQAT SOF INGLIZ TILIDA BERING!
+   - Agar mijoz O'zbek tilida yozsa yoki gapirsa ("Oyog'im og'riyapti", "Salom", "Narxi qancha?") -> SOF O'ZBEK TILIDA javob bering.
+2. Bilimlar bazasidagi ma'lumotlar boshqa tilda yozilgan bo'lsa ham, ularning mazmunini mijozning tiliga moslashtirib (tarjima qilib) tushuntiring.
+3. Agar mijoz shoshilinch yordamga yoki qabulga yozilmoqchi bo'lsa, xushmuomala va aniq yo'l-yo'riq ko'rsating.
 4. Javobingiz oxirida AGAR mijoz o'z telefon raqamini yoki buyurtma xohishini bildirgan bo'lsa, maxsus JSON blok qo'shing:
 ```lead_json
 {{
@@ -176,7 +180,7 @@ Agar hali lid shakllanmagan bo'lsa, `lead_json` blokini qo'shmang."""
                     }
                 },
                 {
-                    "text": "Ushbu ovozli xabarni diqqat bilan tinglang va bilimlaringiz asosida professional tarzda o'zbek tilida javob bering."
+                    "text": "Ushbu ovozli xabarni diqqat bilan eshiting va tahlil qiling. MUHIM: Foydalanuvchi qaysi tilda gapirgan bo'lsa (agar ruscha gapirgan bo'lsa — RUSCHA, agar inglizcha gapirgan bo'lsa — INGLIZCHA, agar o'zbekcha gapirgan bo'lsa — O'ZBEKCHA), AYNAN O'SHA TILDA ravon, muloyim va professional javob bering!"
                 }
             ]
         }]
