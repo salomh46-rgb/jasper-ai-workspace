@@ -145,29 +145,52 @@ export default function PricingHub() {
     <div className="space-y-8 pb-20 animate-fade-in text-white max-w-5xl mx-auto">
       {/* Active Subscription Status Banner */}
       {mySub && (
-        <div className="rounded-3xl bg-gradient-to-r from-blue-900/30 via-indigo-900/20 to-purple-900/30 border border-blue-500/30 p-4 sm:p-6 backdrop-blur-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
-          <div className="flex items-center space-x-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+        <div className={`rounded-3xl border p-5 sm:p-6 backdrop-blur-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xl transition-all ${
+          currentPlanId !== "free" 
+            ? "bg-gradient-to-r from-emerald-950/40 via-[#0E1B17] to-teal-950/30 border-emerald-500/40 shadow-emerald-500/10" 
+            : "bg-gradient-to-r from-blue-900/30 via-indigo-900/20 to-purple-900/30 border-blue-500/30"
+        }`}>
+          <div className="flex items-start space-x-4">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${
+              currentPlanId !== "free" 
+                ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/20" 
+                : "bg-blue-500/20 border-blue-500/30 text-blue-400"
+            }`}>
               <Crown className="w-6 h-6" />
             </div>
-            <div>
-              <div className="flex items-center space-x-2">
+            <div className="space-y-1.5">
+              <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t("current_plan_badge")}:</span>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-extrabold uppercase">
-                  {currentPlanId === "free" ? "Free Trial" : currentPlanId.toUpperCase()} ({t("current_plan_status_active")})
+                <span className={`px-2.5 py-0.5 rounded-full border text-xs font-extrabold uppercase flex items-center gap-1 ${
+                  currentPlanId !== "free" 
+                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40" 
+                    : "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                }`}>
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{currentPlanId === "free" ? "Free Trial" : `${currentPlanId.toUpperCase()} PLAN`}</span>
+                  <span>({t("current_plan_status_active")})</span>
                 </span>
               </div>
-              <p className="text-xs text-slate-300 mt-1">
-                {currentPlanId === "free" ? (
-                  t("current_plan_no_sub")
-                ) : (
-                  <span className="flex items-center gap-1.5 text-blue-300">
+              <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
+                {currentPlanId === "free" && t("current_plan_no_sub")}
+                {currentPlanId === "starter" && (t("current_plan_starter_active_desc") || t("starter_desc"))}
+                {currentPlanId === "pro" && (t("current_plan_pro_active_desc") || t("pro_desc"))}
+                {currentPlanId === "enterprise" && (t("current_plan_enterprise_active_desc") || t("enterprise_desc"))}
+              </p>
+              {currentPlanId !== "free" && (
+                <div className="flex items-center gap-3 pt-1 text-xs font-semibold text-emerald-400">
+                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                     <Clock className="w-3.5 h-3.5" />
                     <span>{mySub.days_left !== null ? `${mySub.days_left} ${t("current_plan_days_left")}` : "30 kun"}</span>
-                    <span>• {mySub.max_bots} ta Bot ruxsati</span>
                   </span>
-                )}
-              </p>
+                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                    <span>🤖 {mySub.max_bots} ta Bot ruxsati</span>
+                  </span>
+                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                    <span>⚡ 24/7 AI Onlayn</span>
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
