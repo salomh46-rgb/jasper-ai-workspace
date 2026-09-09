@@ -46,12 +46,16 @@ class NotificationService:
                 [InlineKeyboardButton(text="📥 CRM & Lidni Ko'rish", web_app=WebAppInfo(url=webapp_url))]
             ])
 
+            c_name = lead_name if lead_name else "Noma'lum"
+            c_phone = lead_phone if lead_phone else "Ko'rsatilmadi"
+            c_intent = intent if intent else "Konsultatsiya"
+
             msg_text = (
                 "🚨 <b>YANGI LID / BUYURTMA QABUL QILINDI!</b>\n\n"
                 f"🤖 <b>Agent:</b> {agent_name}\n"
-                f"👤 <b>Mijoz:</b> {lead_name or 'Noma\'lum'}\n"
-                f"📞 <b>Telefon:</b> <code>{lead_phone or 'Ko\'rsatilmadi'}</code>\n"
-                f"🎯 <b>Murojaat turi:</b> {intent or 'Konsultatsiya'}\n"
+                f"👤 <b>Mijoz:</b> {c_name}\n"
+                f"📞 <b>Telefon:</b> <code>{c_phone}</code>\n"
+                f"🎯 <b>Murojaat turi:</b> {c_intent}\n"
                 f"📝 <b>AI Xulosa:</b> {summary}\n\n"
                 "<i>Jasper CRM orqali mijoz bilan darhol bog'lanishingiz mumkin! 👇</i>"
             )

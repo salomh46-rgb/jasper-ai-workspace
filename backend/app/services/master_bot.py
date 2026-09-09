@@ -136,8 +136,10 @@ async def cmd_leads(message: types.Message):
 
             msg = "📥 <b>SO'NGGI 5 TA LID VA BUYURTMALAR:</b>\n\n"
             for idx, l in enumerate(leads, 1):
-                msg += f"<b>{idx}. {l.customer_name or 'Mijoz'}</b>\n"
-                msg += f"📞 <code>{l.customer_phone or 'Noma\'lum'}</code>\n"
+                phone = l.customer_phone if l.customer_phone else "Noma'lum"
+                name = l.customer_name if l.customer_name else "Mijoz"
+                msg += f"<b>{idx}. {name}</b>\n"
+                msg += f"📞 <code>{phone}</code>\n"
                 msg += f"📝 {l.summary}\n\n"
 
             await message.answer(msg, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(inline_keyboard=[
