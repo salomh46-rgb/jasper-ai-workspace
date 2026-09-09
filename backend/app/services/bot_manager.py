@@ -46,13 +46,28 @@ class BotManager:
                 db.add(conversation)
                 await db.flush()
 
-            # 3. Check if human takeover is active
-            if conversation.is_paused_for_human:
-                # Save customer message and wait for human operator
+            # 3. Check for operator takeover trigger keywords or active paused state
+            operator_keywords = ["operator", "inson", "odam", "admin", "menejer", "mutaxassis", "jonli suhbat"]
+            is_requesting_human = any(k in message_text.lower() for k in operator_keywords)
+
+            if conversation.is_paused_for_human or is_requesting_human:
+                if is_requesting_human and not conversation.is_paused_for_human:
+                    conversation.is_paused_for_human = True
+                    # Notify owner
+                    if agent.owner and agent.owner.telegram_id:
+                        from app.services.notification_service import NotificationService
+                        await NotificationService.notify_human_takeover_request(
+                            user_tg_id=agent.owner.telegram_id,
+                            agent_name=agent.name,
+                            customer_name=customer_name,
+                            last_message=message_text,
+                            fallback_token=agent.bot_token
+                        )
+
                 user_msg = ChatMessage(conversation_id=conversation.id, sender="customer", text=message_text)
                 db.add(user_msg)
                 await db.commit()
-                return "Sizning xabaringiz operatorga uzatildi. Tez orada javob qaytaramiz! 👨‍💻"
+                return "Sizning so'rovingiz qabul qilindi. Operatorimiz tez orada siz bilan bog'lanadi! 👨‍💻"
 
             # 4. Save user message to history
             user_msg = ChatMessage(conversation_id=conversation.id, sender="customer", text=message_text)
@@ -92,22 +107,18 @@ class BotManager:
                 )
                 db.add(new_lead)
                 
-                # Notify business owner if owner has telegram_id
+                # Push notification to business owner
                 if agent.owner and agent.owner.telegram_id:
-                    try:
-                        owner_bot = Bot(token=agent.bot_token)
-                        alert_msg = (
-                            f"🔔 <b>YANGI BUYURTMA / LID TUSHDI!</b>\n\n"
-                            f"🤖 <b>Agent:</b> {agent.name}\n"
-                            f"👤 <b>Mijoz:</b> {new_lead.customer_name}\n"
-                            f"📱 <b>Telefon:</b> {new_lead.customer_phone or 'Ko\'rsatilmadi'}\n"
-                            f"📝 <b>Xulosa:</b> {new_lead.summary}\n\n"
-                            f"Mini App orqali buyurtmani boshqarishingiz mumkin!"
-                        )
-                        await owner_bot.send_message(agent.owner.telegram_id, alert_msg, parse_mode="HTML")
-                        await owner_bot.session.close()
-                    except Exception as e:
-                        logger.error(f"Failed to notify owner: {e}")
+                    from app.services.notification_service import NotificationService
+                    await NotificationService.notify_new_lead(
+                        user_tg_id=agent.owner.telegram_id,
+                        agent_name=agent.name,
+                        lead_name=new_lead.customer_name,
+                        lead_phone=new_lead.customer_phone,
+                        intent=new_lead.intent,
+                        summary=new_lead.summary,
+                        fallback_token=agent.bot_token
+                    )
 
             await db.commit()
             return reply_text

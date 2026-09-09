@@ -144,6 +144,19 @@ async def create_invoice(
     await db.commit()
     await db.refresh(invoice)
 
+    # Push Notification to business owner
+    if current_user.telegram_id:
+        from app.services.notification_service import NotificationService
+        await NotificationService.notify_invoice_created_or_paid(
+            user_tg_id=current_user.telegram_id,
+            agent_name=agent.name,
+            invoice_number=invoice.invoice_number,
+            amount=invoice.amount,
+            customer_name=invoice.customer_name,
+            status=invoice.status,
+            fallback_token=agent.bot_token
+        )
+
     return {
         "status": "success",
         "invoice_id": invoice.id,
@@ -162,7 +175,7 @@ async def update_invoice_status(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    stmt = select(PaymentInvoice).where(PaymentInvoice.id == invoice_id, PaymentInvoice.user_id == current_user.id)
+    stmt = select(PaymentInvoice).where(PaymentInvoice.id == invoice_id, PaymentInvoice.user_id == current_user.id).options(selectinload(PaymentInvoice.agent))
     res = await db.execute(stmt)
     inv = res.scalar_one_or_none()
     if not inv:
@@ -175,4 +188,16 @@ async def update_invoice_status(
         inv.paid_at = None
 
     await db.commit()
+
+    if payload.status == "paid" and current_user.telegram_id:
+        from app.services.notification_service import NotificationService
+        await NotificationService.notify_invoice_created_or_paid(
+            user_tg_id=current_user.telegram_id,
+            agent_name=inv.agent.name if inv.agent else "Kassa",
+            invoice_number=inv.invoice_number,
+            amount=inv.amount,
+            customer_name=inv.customer_name,
+            status="paid"
+        )
+
     return {"status": "success", "invoice_id": inv.id, "new_status": inv.status}
