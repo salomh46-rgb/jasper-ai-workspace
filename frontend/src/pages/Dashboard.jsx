@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
+import { useLanguage } from "../i18n/LanguageContext";
 import { 
   Bot, Users, MessageSquare, Plus, ArrowRight, Sparkles, 
   Building2, ShoppingBag, GraduationCap, Wrench, Zap, TrendingUp, 
@@ -9,6 +10,7 @@ import {
 
 export default function Dashboard({ stats, agents: initialAgents }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [agentsList, setAgentsList] = useState(initialAgents || []);
   const [loadingAgents, setLoadingAgents] = useState(false);
 
@@ -132,20 +134,20 @@ export default function Dashboard({ stats, agents: initialAgents }) {
           <div className="flex items-center justify-between">
             <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-400 text-xs font-semibold tracking-wide">
               <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-              <span>Google Gemini Flash • Multilingual AI (UZ / RU / EN)</span>
+              <span>{t("hero_badge")}</span>
             </div>
             <div className="hidden sm:flex items-center space-x-1.5 text-xs text-slate-400">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Multi-Tenant Himoyalangan</span>
+              <span>{t("hero_multi_tenant")}</span>
             </div>
           </div>
 
           <div>
             <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-              Telegram Biznesingiz Uchun Ko'p Tilli Aqlli AI Agentlar
+              {t("hero_title")}
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-xl leading-relaxed">
-              Mijozlaringiz bilan O'zbek, Rus va Ingliz (UZ/RU/EN) tillarida 24/7 tabiiy suhbatlashuvchi, audio va matnli xabarlarni tushunuvchi, buyurtma oluvchi va CRM ga lid yig'uvchi AI operatorlaringiz.
+              {t("hero_subtitle")}
             </p>
           </div>
 
@@ -155,21 +157,21 @@ export default function Dashboard({ stats, agents: initialAgents }) {
               className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-semibold text-xs sm:text-sm shadow-[0_0_20px_-3px_rgba(59,130,246,0.5),inset_0_1px_0_rgba(255,255,255,0.3)] active:scale-95 transition-all duration-150"
             >
               <Plus className="w-4 h-4" />
-              <span>Yangi AI Agent Yaratish</span>
+              <span>{t("create_agent_btn")}</span>
             </button>
             <button
               onClick={() => navigate("/tester")}
               className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-[#07080D]/80 hover:bg-white/[0.06] border border-white/[0.08] text-slate-300 hover:text-white font-medium text-xs sm:text-sm backdrop-blur-md transition-all duration-150"
             >
               <Play className="w-3.5 h-3.5 text-emerald-400" />
-              <span>AI Ovoz & Sinov</span>
+              <span>{t("test_voice_btn")}</span>
             </button>
             <button
               onClick={() => navigate("/pricing")}
               className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/40 text-amber-300 font-semibold text-xs sm:text-sm backdrop-blur-md transition-all duration-150"
             >
               <span className="text-amber-400">⭐</span>
-              <span>Tariflar & Obuna</span>
+              <span>{t("pricing_btn")}</span>
             </button>
           </div>
         </div>
@@ -180,15 +182,17 @@ export default function Dashboard({ stats, agents: initialAgents }) {
         <div className="flex items-center justify-between px-1">
           <div>
             <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-300">
-              Tayyor Biznes Shablonlari (1-Bosishda Yaratish)
+              {t("templates_title")}
             </h3>
-            <p className="text-[11px] text-slate-500">O‘z sohangizga mos yo‘nalishni tanlang yoki noldan yarating</p>
+            <p className="text-[11px] text-slate-500">{t("templates_subtitle")}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {templates.map((tpl) => {
             const IconComponent = tpl.icon;
+            const localizedTitle = t(`tpl_${tpl.id}_title`) !== `tpl_${tpl.id}_title` ? t(`tpl_${tpl.id}_title`) : tpl.title;
+            const localizedDesc = t(`tpl_${tpl.id}_desc`) !== `tpl_${tpl.id}_desc` ? t(`tpl_${tpl.id}_desc`) : tpl.desc;
             return (
               <div
                 key={tpl.id}
@@ -209,16 +213,16 @@ export default function Dashboard({ stats, agents: initialAgents }) {
 
                   <div>
                     <h4 className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors">
-                      {tpl.title}
+                      {localizedTitle}
                     </h4>
                     <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                      {tpl.desc}
+                      {localizedDesc}
                     </p>
                   </div>
                 </div>
 
                 <div className="pt-3 border-t border-white/[0.05] flex items-center justify-between text-xs font-semibold text-blue-400 group-hover:text-blue-300 mt-2">
-                  <span>Shablonni Ishlatish</span>
+                  <span>{t("use_template")}</span>
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
@@ -228,16 +232,16 @@ export default function Dashboard({ stats, agents: initialAgents }) {
       </div>
 
       {/* Active User Agents Section */}
-      <div className="space-y-3 pt-2">
+      <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-bold text-white tracking-wide">
-              Mening AI Agentlarim ({agentsList.length})
+          <div className="flex items-center space-x-2">
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-300">
+              {t("active_agents_title")}
             </h3>
             <button
               onClick={loadLiveAgents}
               className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-white/50 hover:text-white transition"
-              title="Yangilash"
+              title={t("refresh")}
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loadingAgents ? 'animate-spin' : ''}`} />
             </button>
@@ -247,21 +251,21 @@ export default function Dashboard({ stats, agents: initialAgents }) {
             className="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center space-x-1 transition"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Yangi qo‘shish</span>
+            <span>{t("create_agent_btn")}</span>
           </button>
         </div>
 
         {loadingAgents && agentsList.length === 0 ? (
-          <div className="p-8 text-center text-xs text-white/40">Agentlar ro‘yxati yuklanmoqda...</div>
+          <div className="p-8 text-center text-xs text-white/40">...</div>
         ) : agentsList.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-white/[0.1] bg-[#0E121B]/40 p-8 text-center space-y-3">
             <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto">
               <Bot className="w-6 h-6" />
             </div>
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-white">Sizda hali faol AI agentlar yo‘q</h4>
+              <h4 className="text-sm font-bold text-white">{t("active_agents_title")}</h4>
               <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                Yuqoridagi tayyor shablonlardan birini tanlang yoki o‘zingiz noldan yangi bot yarating.
+                {t("no_agents_text")}
               </p>
             </div>
             <button
@@ -269,7 +273,7 @@ export default function Dashboard({ stats, agents: initialAgents }) {
               className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition shadow-md"
             >
               <Plus className="w-4 h-4" />
-              <span>Birinchi Agentni Yaratish</span>
+              <span>{t("create_agent_btn")}</span>
             </button>
           </div>
         ) : (
@@ -290,19 +294,19 @@ export default function Dashboard({ stats, agents: initialAgents }) {
                         {agent.name}
                       </h4>
                       <p className="text-[11px] text-slate-400 font-mono">
-                        {agent.bot_token_masked || (agent.bot_token ? `${agent.bot_token.slice(0, 8)}...` : "Token kiritilmagan")}
+                        {agent.bot_token_masked || (agent.bot_token ? `${agent.bot_token.slice(0, 8)}...` : "Token")}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      Faol
+                      ● Onlayn
                     </span>
                     <button
                       onClick={(e) => handleDeleteAgentDirect(e, agent.id)}
                       className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-red-500/20 text-white/40 hover:text-red-400 border border-white/[0.06] transition"
-                      title="Agentni o'chirish"
+                      title="O'chirish"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -312,18 +316,29 @@ export default function Dashboard({ stats, agents: initialAgents }) {
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/[0.05] text-xs">
                   <div 
                     onClick={(e) => { e.stopPropagation(); navigate(`/agents/${agent.id}/knowledge`); }}
-                    className="p-2 rounded-xl bg-[#07080D] border border-white/[0.04] hover:border-blue-500/30 transition text-slate-300"
+                    className="p-2 rounded-xl bg-[#07080D] border border-white/[0.04] hover:border-blue-500/30 transition text-slate-300 flex items-center justify-between"
                   >
-                    <span className="text-[10px] text-slate-500 block">Bilimlar:</span>
-                    <span className="font-bold text-white">{agent.knowledge_count || 0} ta ma'lumot</span>
+                    <span className="text-slate-400">{t("btn_knowledge")}:</span>
+                    <span className="font-bold text-blue-400">{agent.knowledge_count || 0}</span>
                   </div>
+
                   <div 
-                    onClick={(e) => { e.stopPropagation(); navigate("/leads"); }}
-                    className="p-2 rounded-xl bg-[#07080D] border border-white/[0.04] hover:border-emerald-500/30 transition text-slate-300"
+                    onClick={(e) => { e.stopPropagation(); navigate(`/leads?agent_id=${agent.id}`); }}
+                    className="p-2 rounded-xl bg-[#07080D] border border-white/[0.04] hover:border-blue-500/30 transition text-slate-300 flex items-center justify-between"
                   >
-                    <span className="text-[10px] text-slate-500 block">Lidlar (CRM):</span>
-                    <span className="font-bold text-emerald-400">{agent.leads_count || 0} ta lid</span>
+                    <span className="text-slate-400">Lidlar:</span>
+                    <span className="font-bold text-emerald-400">{agent.leads_count || 0}</span>
                   </div>
+                </div>
+
+                <div className="pt-1 flex items-center justify-between">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigate(`/tester?agent_id=${agent.id}`); }}
+                    className="w-full py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white font-medium text-xs flex items-center justify-center gap-1.5 transition"
+                  >
+                    <Play className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>{t("btn_test")}</span>
+                  </button>
                 </div>
               </div>
             ))}
