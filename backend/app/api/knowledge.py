@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
@@ -8,6 +8,7 @@ from app.api.deps import get_current_user
 from app.models.user import User
 from app.models.agent import Agent
 from app.models.knowledge import KnowledgeItem
+from app.services.document_parser import DocumentParserService
 
 router = APIRouter(prefix="/knowledge", tags=["Knowledge"])
 
@@ -23,9 +24,59 @@ class KnowledgeUpdateRequest(BaseModel):
     category: Optional[str] = None
     is_active: Optional[bool] = None
 
+@router.post("/upload-file")
+async def upload_knowledge_file(
+    agent_id: int = Form(...),
+    category: str = Form("service"),
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Verify agent ownership
+    stmt = select(Agent).where(Agent.id == agent_id, Agent.user_id == current_user.id)
+    res = await db.execute(stmt)
+    if not res.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Agent topilmadi")
+
+    content_bytes = await file.read()
+    if len(content_bytes) > 20 * 1024 * 1024:  # 20MB limit
+        raise HTTPException(status_code=400, detail="Fayl hajmi 20MB dan oshmasligi kerak")
+
+    try:
+        parsed_items = await DocumentParserService.parse_file(
+            filename=file.filename,
+            content_bytes=content_bytes,
+            mime_type=file.content_type or ""
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    saved_items = []
+    for item in parsed_items:
+        k_item = KnowledgeItem(
+            agent_id=agent_id,
+            title=item["title"],
+            content=item["content"],
+            category=item.get("category", category)
+        )
+        db.add(k_item)
+        saved_items.append(k_item)
+
+    await db.commit()
+    for item in saved_items:
+        await db.refresh(item)
+
+    return {
+        "status": "success",
+        "message": f"'{file.filename}' faylidan {len(saved_items)} ta bilim muvaffaqiyatli saqlandi!",
+        "items_count": len(saved_items),
+        "items": [
+            {"id": it.id, "title": it.title, "category": it.category} for it in saved_items
+        ]
+    }
+
 @router.get("/agent/{agent_id}")
 async def list_agent_knowledge(agent_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Verify agent ownership
     stmt = select(Agent).where(Agent.id == agent_id, Agent.user_id == current_user.id)
     res = await db.execute(stmt)
     if not res.scalar_one_or_none():

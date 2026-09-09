@@ -128,6 +128,37 @@ class ApiService {
     });
   }
 
+  
+  async uploadKnowledgeFile(agentId, file, category = "service") {
+    const url = `${API_BASE_URL}/knowledge/upload-file`;
+    const formData = new FormData();
+    formData.append('agent_id', agentId);
+    formData.append('category', category);
+    formData.append('file', file);
+
+    const headers = {};
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData
+    });
+
+    if (!response.ok) {
+      let errMessage = `Fayl yuklashda xatolik: ${response.status}`;
+      try {
+        const errData = await response.json();
+        if (typeof errData.detail === 'string') errMessage = errData.detail;
+      } catch (e) {}
+      throw new Error(errMessage);
+    }
+
+    return await response.json();
+  }
+
   async deleteKnowledge(itemId) {
     return await this.request(`/knowledge/${itemId}`, {
       method: 'DELETE'
