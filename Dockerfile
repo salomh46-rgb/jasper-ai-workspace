@@ -30,7 +30,7 @@ COPY backend/ .
 # Copy built frontend assets into backend static folder
 COPY --from=frontend-builder /build/dist ./static
 
-EXPOSE 8000
+EXPOSE 8080 8000
 
 # Start server using dynamic Railway PORT
 CMD ["python", "main.py"]

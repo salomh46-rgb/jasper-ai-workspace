@@ -28,15 +28,65 @@ logger = logging.getLogger("jasper_workspace")
 
 from app.services.master_bot import start_master_bot, stop_master_bot
 
+import asyncio
+
+async def start_port_forwarder(source_port: int, target_port: int):
+    if source_port == target_port:
+        return None
+    async def handle_client(reader, writer):
+        try:
+            t_reader, t_writer = await asyncio.open_connection("127.0.0.1", target_port)
+            async def pipe(r, w):
+                try:
+                    while True:
+                        data = await r.read(65536)
+                        if not data:
+                            break
+                        w.write(data)
+                        await w.drain()
+                except Exception:
+                    pass
+                finally:
+                    try:
+                        w.close()
+                    except Exception:
+                        pass
+            asyncio.create_task(pipe(reader, t_writer))
+            asyncio.create_task(pipe(t_reader, writer))
+        except Exception:
+            try:
+                writer.close()
+            except Exception:
+                pass
+    try:
+        server = await asyncio.start_server(handle_client, "0.0.0.0", source_port)
+        logger.info(f"🔀 Port forwarding faollashtirildi: 0.0.0.0:{source_port} -> 127.0.0.1:{target_port}")
+        return server
+    except Exception as e:
+        logger.warning(f"Zaxira port {source_port} ochishda ogohlantirish: {e}")
+        return None
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("🚀 Jasper AI Workspace ishga tushmoqda...")
     await init_db()
     logger.info("✅ Ma'lumotlar bazasi initsializatsiya qilindi.")
+
+    # Start dual-port forwarder between 8080 and 8000 for Railway compatibility
+    active_port = int(os.environ.get("PORT", 8080))
+    forward_server = None
+    if active_port == 8080:
+        forward_server = await start_port_forwarder(8000, 8080)
+    elif active_port == 8000:
+        forward_server = await start_port_forwarder(8080, 8000)
+
     await start_master_bot()
     from app.services.bot_manager import BotManager
     await BotManager.start_all_agent_bots()
     yield
+    if forward_server:
+        forward_server.close()
+        await forward_server.wait_closed()
     await stop_master_bot()
     from app.services.bot_manager import BotManager
     for tok in list(BotManager._active_bot_tasks.keys()):
