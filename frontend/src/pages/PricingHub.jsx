@@ -184,10 +184,10 @@ export default function PricingHub() {
                     <span>{mySub.days_left !== null ? `${mySub.days_left} ${t("current_plan_days_left")}` : "30 kun"}</span>
                   </span>
                   <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-300 border border-blue-500/20">
-                    <span>🤖 {mySub.max_bots} ta Bot ruxsati</span>
+                    <span>🤖 {mySub.max_bots} {t("current_plan_bots_allowed")}</span>
                   </span>
                   <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-300 border border-purple-500/20">
-                    <span>⚡ 24/7 AI Onlayn</span>
+                    <span>⚡ {t("current_plan_online_server")}</span>
                   </span>
                 </div>
               )}

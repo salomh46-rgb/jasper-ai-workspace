@@ -16,6 +16,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState(null);
   const [agents, setAgents] = useState([]);
+  const [leads, setLeads] = useState([]);
   const [mySub, setMySub] = useState(null);
   const [loading, setLoading] = useState(true);
 

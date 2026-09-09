@@ -186,10 +186,10 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
                     <span>{localSub.days_left !== null ? `${localSub.days_left} ${t("current_plan_days_left")}` : "30 kun"}</span>
                   </span>
                   <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-300 border border-blue-500/20">
-                    <span>🤖 {localSub.max_bots} ta Bot ruxsati</span>
+                    <span>🤖 {localSub.max_bots} {t("current_plan_bots_allowed")}</span>
                   </span>
                   <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20">
-                    <span>⚡ 24/7 AI Onlayn Server</span>
+                    <span>⚡ {t("current_plan_online_server")}</span>
                   </span>
                 </div>
               )}
