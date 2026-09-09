@@ -59,6 +59,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
 # Routerlarni ulash
 app.include_router(auth_router, prefix="/api")
 app.include_router(agents_router, prefix="/api")
@@ -69,8 +73,12 @@ app.include_router(conversations_router, prefix="/api")
 app.include_router(payments_router, prefix="/api")
 app.include_router(webhook_router)
 
-@app.get("/")
-async def root():
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
+
+@app.get("/api/info")
+async def api_info():
     return {
         "status": "online",
         "app": "Jasper AI Workspace SaaS Platform",
@@ -78,6 +86,36 @@ async def root():
         "gemini_model": settings.GEMINI_MODEL
     }
 
-@app.get("/health")
-async def health():
-    return {"status": "healthy"}
+# Frontend SPA / Static Files Mount
+FRONTEND_DIST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "dist"))
+STATIC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "static"))
+
+target_dist = None
+if os.path.exists(STATIC_DIR) and os.path.exists(os.path.join(STATIC_DIR, "index.html")):
+    target_dist = STATIC_DIR
+elif os.path.exists(FRONTEND_DIST_DIR) and os.path.exists(os.path.join(FRONTEND_DIST_DIR, "index.html")):
+    target_dist = FRONTEND_DIST_DIR
+
+if target_dist:
+    logger.info(f"🌐 Frontend Single-Page App yuklandi: {target_dist}")
+    assets_dir = os.path.join(target_dist, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        if full_path.startswith("api/") or full_path.startswith("docs") or full_path.startswith("openapi.json"):
+            return {"error": "Not Found"}
+        potential_file = os.path.join(target_dist, full_path)
+        if full_path and os.path.isfile(potential_file):
+            return FileResponse(potential_file)
+        return FileResponse(os.path.join(target_dist, "index.html"))
+else:
+    @app.get("/")
+    async def root():
+        return {
+            "status": "online",
+            "app": "Jasper AI Workspace SaaS Platform",
+            "version": "1.0.0",
+            "gemini_model": settings.GEMINI_MODEL
+        }
