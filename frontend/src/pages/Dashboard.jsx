@@ -2,10 +2,22 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Bot, Users, MessageSquare, Plus, ArrowRight, Sparkles, 
-  Building2, ShoppingBag, GraduationCap, Wrench, Zap, TrendingUp, ShieldCheck, Play 
+  Building2, ShoppingBag, GraduationCap, Wrench, Zap, TrendingUp, ShieldCheck, Play, Trash2, Headphones 
 } from "lucide-react";
 
 export default function Dashboard({ stats, agents, onSelectAgent }) {
+
+  const handleDeleteAgentDirect = async (e, agentId) => {
+    e.stopPropagation();
+    if (!confirm("Ushbu AI agentni oʻchirishni tasdiqlaysizmi?")) return;
+    try {
+      await api.deleteAgent(agentId);
+      window.location.reload();
+    } catch (err) {
+      alert(err.message || "Oʻchirishda xatolik");
+    }
+  };
+
   const navigate = useNavigate();
 
   const templates = [
@@ -138,7 +150,9 @@ export default function Dashboard({ stats, agents, onSelectAgent }) {
         </div>
 
         {/* Metric 3: Conversations */}
-        <div className="relative overflow-hidden rounded-2xl bg-[#0E121B]/80 backdrop-blur-xl border border-white/[0.07] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] group hover:border-white/[0.14] transition-all">
+        <div 
+          onClick={() => navigate("/chat")}
+          className="relative overflow-hidden rounded-2xl bg-[#0E121B]/80 backdrop-blur-xl border border-white/[0.07] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] group hover:border-purple-500/40 cursor-pointer transition-all">
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider">Muloqotlar</span>
             <div className="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
@@ -246,11 +260,19 @@ export default function Dashboard({ stats, agents, onSelectAgent }) {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
                   <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     <span>Onlayn</span>
                   </span>
+                  <button
+                    type="button"
+                    onClick={(e) => handleDeleteAgentDirect(e, agent.id)}
+                    className="p-2 rounded-xl bg-white/[0.02] hover:bg-rose-500/15 text-slate-400 hover:text-rose-400 transition-colors"
+                    title="Agentni o'chirish"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                   <div className="p-1.5 rounded-lg bg-white/[0.03] group-hover:bg-blue-500/10 text-slate-400 group-hover:text-blue-400 transition-colors">
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                   </div>

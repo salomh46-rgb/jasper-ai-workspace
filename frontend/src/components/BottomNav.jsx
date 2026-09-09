@@ -1,12 +1,13 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Bot, Users, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Bot, Users, MessageSquare, Headphones } from "lucide-react";
 
 export default function BottomNav({ newLeadsCount = 0 }) {
   const navItems = [
     { to: "/", label: "Bosh sahifa", icon: LayoutDashboard },
     { to: "/agents", label: "Agentlar", icon: Bot },
     { to: "/leads", label: "Lidlar CRM", icon: Users, badge: newLeadsCount },
+    { to: "/chat", label: "Live Chat", icon: Headphones },
     { to: "/tester", label: "AI Test", icon: MessageSquare },
   ];
 

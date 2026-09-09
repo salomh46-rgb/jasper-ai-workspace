@@ -214,6 +214,31 @@ class ApiService {
       body: JSON.stringify({ sheet_id: sheetId, webhook_url: webhookUrl })
     });
   }
+
+  // Conversations & Live Chat
+  async getConversations(agentId = null) {
+    let url = '/conversations';
+    if (agentId) url += `?agent_id=${agentId}`;
+    return await this.request(url);
+  }
+
+  async getConversation(convId) {
+    return await this.request(`/conversations/${convId}`);
+  }
+
+  async toggleHumanTakeover(convId, isPausedForHuman) {
+    return await this.request(`/conversations/${convId}/toggle-human`, {
+      method: 'POST',
+      body: JSON.stringify({ is_paused_for_human: isPausedForHuman })
+    });
+  }
+
+  async sendOperatorReply(convId, text) {
+    return await this.request(`/conversations/${convId}/reply`, {
+      method: 'POST',
+      body: JSON.stringify({ text })
+    });
+  }
 }
 
 export const api = new ApiService();

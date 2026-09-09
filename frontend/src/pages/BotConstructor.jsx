@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
 import { 
   Save, ArrowLeft, Sparkles, Building2, ShoppingBag, 
-  GraduationCap, Wrench, Key, BookOpen, Check, Wand2, X 
+  GraduationCap, Wrench, Key, BookOpen, Check, Wand2, X, Trash2 
 } from "lucide-react";
 
 export default function BotConstructor() {
@@ -125,6 +125,19 @@ export default function BotConstructor() {
       alert(err.message || "AI prompt yaratishda xatolik yuz berdi");
     } finally {
       setGeneratingPrompt(false);
+    }
+  };
+
+  
+  const handleDeleteAgent = async () => {
+    if (!id || id === "new") return;
+    if (!confirm("Rostdan ham ushbu AI agentni butunlay oʻchirib tashlamoqchimisiz?")) return;
+
+    try {
+      await api.deleteAgent(id);
+      navigate("/agents");
+    } catch (err) {
+      alert(err.message || "Agentni oʻchirishda xatolik yuz berdi");
     }
   };
 

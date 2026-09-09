@@ -8,6 +8,7 @@ import BotConstructor from './pages/BotConstructor';
 import KnowledgeHub from './pages/KnowledgeHub';
 import LeadsCRM from './pages/LeadsCRM';
 import AgentTester from './pages/AgentTester';
+import LiveChatInbox from './pages/LiveChatInbox';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -86,6 +87,7 @@ export default function App() {
           <Route path="/agents/:agentId/knowledge" element={<KnowledgeHub />} />
           <Route path="/leads" element={<LeadsCRM />} />
           <Route path="/tester" element={<AgentTester agents={agents} />} />
+          <Route path="/chat" element={<LiveChatInbox />} />
         </Routes>
       </main>
 
