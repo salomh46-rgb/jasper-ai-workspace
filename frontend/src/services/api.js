@@ -269,6 +269,13 @@ class ApiService {
       body: JSON.stringify({ status })
     });
   }
+
+  async generateSpeech(agentId, text, voice = "uz-UZ-MadinaNeural") {
+    return await this.request(`/agents/${agentId}/tts`, {
+      method: 'POST',
+      body: JSON.stringify({ text, voice })
+    });
+  }
 }
 
 export const api = new ApiService();

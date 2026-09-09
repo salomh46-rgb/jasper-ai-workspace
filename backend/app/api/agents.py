@@ -92,6 +92,10 @@ class TestAgentRequest(BaseModel):
     audio_base64: Optional[str] = None
     mime_type: Optional[str] = "audio/ogg"
 
+class TTSRequest(BaseModel):
+    text: str
+    voice: Optional[str] = "uz-UZ-MadinaNeural"
+
 @router.get("/templates")
 async def get_templates():
     return TEMPLATES
@@ -231,6 +235,16 @@ async def test_agent(agent_id: int, payload: TestAgentRequest, db: AsyncSession 
             user_message=payload.message or "Salom"
         )
     return ai_res
+
+@router.post("/{agent_id}/tts")
+async def generate_speech(agent_id: int, payload: TTSRequest, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    from app.services.voice_service import VoiceService
+    audio_bytes = await VoiceService.text_to_speech(payload.text, payload.voice or "uz-UZ-MadinaNeural")
+    import base64
+    return {
+        "audio_base64": base64.b64encode(audio_bytes).decode("utf-8"),
+        "mime_type": "audio/mp3"
+    }
 
 @router.delete("/{agent_id}")
 async def delete_agent(agent_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
