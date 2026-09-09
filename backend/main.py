@@ -24,12 +24,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger("jasper_workspace")
 
+from app.services.master_bot import start_master_bot, stop_master_bot
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("🚀 Jasper AI Workspace ishga tushmoqda...")
     await init_db()
     logger.info("✅ Ma'lumotlar bazasi initsializatsiya qilindi.")
+    await start_master_bot()
     yield
+    await stop_master_bot()
     logger.info("🛑 Jasper AI Workspace to'xtatildi.")
 
 app = FastAPI(
