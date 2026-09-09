@@ -6,7 +6,7 @@ import {
   Bot, Users, MessageSquare, Plus, ArrowRight, Sparkles, 
   Building2, ShoppingBag, GraduationCap, Wrench, Zap, TrendingUp, 
   ShieldCheck, Play, Trash2, Headphones, Activity, Utensils, Home, Truck, RefreshCw,
-  Crown, CheckCircle2, Clock, Star
+  Crown, CheckCircle2, Clock, Star, AlertTriangle, X, Lock
 } from "lucide-react";
 
 export default function Dashboard({ stats, agents: initialAgents, mySub: propSub, onRefreshSub }) {
@@ -15,6 +15,7 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
   const [agentsList, setAgentsList] = useState(initialAgents || []);
   const [loadingAgents, setLoadingAgents] = useState(false);
   const [localSub, setLocalSub] = useState(propSub || null);
+  const [showLimitModal, setShowLimitModal] = useState(false);
 
   useEffect(() => {
     loadLiveAgents();
@@ -32,6 +33,18 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
     } catch (err) {
       console.error("Error loading sub in dashboard:", err);
     }
+  };
+
+  const maxBots = localSub?.max_bots || (localSub?.subscription_plan === 'starter' ? 2 : localSub?.subscription_plan === 'pro' ? 3 : 1);
+  const currentPlanName = (localSub?.subscription_plan || 'free').toUpperCase();
+  const isLimitReached = (agentsList.length >= maxBots) && (localSub?.subscription_plan !== 'enterprise');
+
+  const handleCreateAgent = (targetUrl = "/agents/new") => {
+    if (isLimitReached) {
+      setShowLimitModal(true);
+      return;
+    }
+    navigate(targetUrl);
   };
 
   const loadLiveAgents = async () => {
@@ -236,7 +249,7 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
 
           <div className="pt-2 flex flex-wrap items-center gap-3">
             <button
-              onClick={() => navigate("/agents/new")}
+              onClick={() => handleCreateAgent("/agents/new")}
               className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-semibold text-xs sm:text-sm shadow-[0_0_20px_-3px_rgba(59,130,246,0.5),inset_0_1px_0_rgba(255,255,255,0.3)] active:scale-95 transition-all duration-150"
             >
               <Plus className="w-4 h-4" />
@@ -279,7 +292,7 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
             return (
               <div
                 key={tpl.id}
-                onClick={() => navigate(`/agents/new?category=${tpl.id}`)}
+                onClick={() => handleCreateAgent(`/agents/new?category=${tpl.id}`)}
                 className="group relative cursor-pointer overflow-hidden rounded-2xl bg-[#0E121B]/90 hover:bg-[#141A26] border border-white/[0.07] hover:border-blue-500/40 p-4 transition-all duration-200 hover:-translate-y-1 shadow-[0_4px_20px_rgba(0,0,0,0.4)] flex flex-col justify-between"
               >
                 <div className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br ${tpl.accent} blur-2xl group-hover:scale-150 transition-all duration-300`} />
@@ -317,10 +330,17 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
       {/* Active User Agents Section */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2.5">
             <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-300">
               {t("active_agents_title")}
             </h3>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+              isLimitReached
+                ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                : "bg-white/[0.04] text-slate-400 border-white/10"
+            }`}>
+              {agentsList.length} / {maxBots} {t("bots_limit_label")}
+            </span>
             <button
               onClick={loadLiveAgents}
               className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-white/50 hover:text-white transition"
@@ -330,7 +350,7 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
             </button>
           </div>
           <button
-            onClick={() => navigate("/agents/new")}
+            onClick={() => handleCreateAgent("/agents/new")}
             className="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center space-x-1 transition"
           >
             <Plus className="w-3.5 h-3.5" />
@@ -352,7 +372,7 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
               </p>
             </div>
             <button
-              onClick={() => navigate("/agents/new")}
+              onClick={() => handleCreateAgent("/agents/new")}
               className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition shadow-md"
             >
               <Plus className="w-4 h-4" />
@@ -428,6 +448,69 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
           </div>
         )}
       </div>
+
+      {/* Subscription Limit Modal */}
+      {showLimitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-md rounded-3xl bg-[#0E121B] border border-amber-500/40 p-6 sm:p-7 shadow-[0_0_50px_rgba(245,158,11,0.2)] space-y-5 animate-scale-up text-white">
+            <button 
+              onClick={() => setShowLimitModal(false)}
+              className="absolute top-4 right-4 p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 hover:text-white transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-lg shadow-amber-500/10 mx-auto">
+              <AlertTriangle className="w-7 h-7 animate-bounce" />
+            </div>
+
+            <div className="text-center space-y-2">
+              <h3 className="text-lg sm:text-xl font-extrabold text-white">
+                {t("limit_modal_title")}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                {t("limit_modal_desc")}
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[#07080D] border border-white/[0.06] space-y-2 text-xs">
+              <div className="flex items-center justify-between text-slate-400">
+                <span>{t("limit_modal_current_plan")}</span>
+                <span className="font-bold text-amber-400 uppercase">{currentPlanName} PLAN</span>
+              </div>
+              <div className="flex items-center justify-between text-slate-400">
+                <span>{t("limit_modal_allowed_limit")}</span>
+                <span className="font-bold text-white">{maxBots} {t("bots_limit_label")}</span>
+              </div>
+              <div className="flex items-center justify-between text-slate-400">
+                <span>{t("limit_modal_created_bots")}</span>
+                <span className="font-bold text-rose-400">{agentsList.length} {t("bots_limit_label")} ({t("limit_modal_status_full")})</span>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-1">
+              <button
+                onClick={() => {
+                  setShowLimitModal(false);
+                  navigate("/pricing");
+                }}
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 active:scale-95 transition-all"
+              >
+                <Crown className="w-4 h-4 text-amber-300" />
+                <span>{t("limit_modal_btn_upgrade")} (3 {t("bots_limit_label")} & Voice AI)</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              
+              <button
+                onClick={() => setShowLimitModal(false)}
+                className="w-full py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 hover:text-white font-semibold text-xs transition"
+              >
+                {t("limit_modal_btn_close")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

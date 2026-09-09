@@ -171,6 +171,23 @@ async def list_agents(db: AsyncSession = Depends(get_db), current_user: User = D
 
 @router.post("")
 async def create_agent(payload: AgentCreateRequest, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # 1. Enforce Subscription Bot Limits
+    from sqlalchemy import func
+    count_stmt = select(func.count(Agent.id)).where(Agent.user_id == current_user.id)
+    count_res = await db.execute(count_stmt)
+    current_count = count_res.scalar() or 0
+    
+    plan = getattr(current_user, "subscription_plan", "free") or "free"
+    plan_limits = {"free": 1, "starter": 2, "pro": 3, "enterprise": 999}
+    user_max_bots = getattr(current_user, "max_bots", None)
+    limit = user_max_bots if (user_max_bots is not None and user_max_bots > 0) else plan_limits.get(plan, 1)
+
+    if current_count >= limit:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Sizning joriy {plan.upper()} tarifingizda ko'pi bilan {limit} ta bot yaratish mumkin! (Hozirda {current_count} ta botingiz mavjud). Yangi bot yaratish uchun tarifingizni Pro (3 ta) yoki Enterprise ga oshiring."
+        )
+
     tpl = TEMPLATES.get(payload.category, {
         "system_prompt": f"Siz {payload.name} kompaniyasining aqlli AI xodimisiz.",
         "welcome_message": "Assalomu alaykum! Sizga qanday yordam bera olaman?",

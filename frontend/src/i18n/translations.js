@@ -61,6 +61,15 @@ export const translations = {
     btn_knowledge: "Bilimlar Bazasi",
     btn_test: "Sinash & Ovoz",
     btn_edit: "Tahrirlash",
+    bots_limit_label: "ta bot",
+    limit_modal_title: "⚠️ Tarif Chegarasiga Yetdingiz!",
+    limit_modal_desc: "Sizning joriy tarifingizda ko'pi bilan belgilangan miqdorda AI-Bot yaratish mumkin. Yangi bot yaratish uchun tarifingizni Pro yoki Enterprise ga oshiring.",
+    limit_modal_current_plan: "Joriy tarifingiz:",
+    limit_modal_allowed_limit: "Ruxsat etilgan limit:",
+    limit_modal_created_bots: "Yaratilgan botlar soni:",
+    limit_modal_status_full: "To'lgan",
+    limit_modal_btn_upgrade: "⚡ Pro Tarifga O'tish",
+    limit_modal_btn_close: "Tushundim / Yopish",
 
     // Constructor
     constructor_header_new: "Yangi AI Agent Yaratish",
@@ -452,6 +461,15 @@ export const translations = {
     btn_knowledge: "База Знаний",
     btn_test: "Тест & Голос",
     btn_edit: "Редактировать",
+    bots_limit_label: "ботов",
+    limit_modal_title: "⚠️ Лимит Тарифа Исчерпан!",
+    limit_modal_desc: "На вашем текущем тарифе исчерпан лимит создания ИИ-ботов. Чтобы добавить нового бота, обновите тариф до Pro (3 бота) или Enterprise (безлимит).",
+    limit_modal_current_plan: "Ваш текущий тариф:",
+    limit_modal_allowed_limit: "Разрешенный лимит:",
+    limit_modal_created_bots: "Количество созданных ботов:",
+    limit_modal_status_full: "Исчерпан",
+    limit_modal_btn_upgrade: "⚡ Перейти на Pro",
+    limit_modal_btn_close: "Понятно / Закрыть",
 
     // Constructor
     constructor_header_new: "Создание Нового ИИ-Агента",
@@ -778,12 +796,21 @@ export const translations = {
 
     // Active Agents
     active_agents_title: "My AI Agents",
-    no_agents_text: "You don't have any active agents yet. Select a template above!",
-    knowledge_count: "knowledge items",
+    no_agents_text: "You don't have active agents yet. Select a template above!",
+    knowledge_count: "knowledge",
     leads_count: "leads",
     btn_knowledge: "Knowledge Hub",
     btn_test: "Test & Voice",
     btn_edit: "Edit",
+    bots_limit_label: "bots",
+    limit_modal_title: "⚠️ Plan Limit Reached!",
+    limit_modal_desc: "You have reached the maximum number of AI bots allowed on your current plan. Please upgrade to Pro (3 bots) or Enterprise (unlimited) to create more.",
+    limit_modal_current_plan: "Your current plan:",
+    limit_modal_allowed_limit: "Allowed limit:",
+    limit_modal_created_bots: "Created bots count:",
+    limit_modal_status_full: "Full",
+    limit_modal_btn_upgrade: "⚡ Upgrade to Pro",
+    limit_modal_btn_close: "Got it / Close",
 
     // Constructor
     constructor_header_new: "Create New AI Agent",
