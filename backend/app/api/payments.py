@@ -272,7 +272,7 @@ async def admin_activate_plan(
         raise HTTPException(status_code=404, detail="Foydalanuvchi topilmadi")
     
     from datetime import timedelta, timezone
-    bot_limits = {"starter": 1, "pro": 3, "enterprise": 999}
+    bot_limits = {"starter": 2, "pro": 3, "enterprise": 999}
     target_user.subscription_plan = plan_id
     target_user.plan_status = "active"
     target_user.max_bots = bot_limits.get(plan_id, 1)

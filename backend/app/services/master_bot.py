@@ -160,7 +160,7 @@ async def handle_callbacks(call: types.CallbackQuery):
         plan_id = parts[3]
         
         from datetime import datetime, timedelta, timezone
-        bot_limits = {"starter": 1, "pro": 3, "enterprise": 999}
+        bot_limits = {"starter": 2, "pro": 3, "enterprise": 999}
         plan_titles = {"starter": "Boshlang'ich (Starter)", "pro": "Professional (Pro)", "enterprise": "Korporativ (Enterprise)"}
         
         try:

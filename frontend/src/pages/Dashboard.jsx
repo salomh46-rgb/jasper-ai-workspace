@@ -5,18 +5,34 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { 
   Bot, Users, MessageSquare, Plus, ArrowRight, Sparkles, 
   Building2, ShoppingBag, GraduationCap, Wrench, Zap, TrendingUp, 
-  ShieldCheck, Play, Trash2, Headphones, Activity, Utensils, Home, Truck, RefreshCw
+  ShieldCheck, Play, Trash2, Headphones, Activity, Utensils, Home, Truck, RefreshCw,
+  Crown, CheckCircle2, Clock, Star
 } from "lucide-react";
 
-export default function Dashboard({ stats, agents: initialAgents }) {
+export default function Dashboard({ stats, agents: initialAgents, mySub: propSub, onRefreshSub }) {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [agentsList, setAgentsList] = useState(initialAgents || []);
   const [loadingAgents, setLoadingAgents] = useState(false);
+  const [localSub, setLocalSub] = useState(propSub || null);
 
   useEffect(() => {
     loadLiveAgents();
-  }, []);
+    if (!propSub) {
+      loadSub();
+    } else {
+      setLocalSub(propSub);
+    }
+  }, [propSub]);
+
+  const loadSub = async () => {
+    try {
+      const sub = await api.getMySubscription();
+      setLocalSub(sub);
+    } catch (err) {
+      console.error("Error loading sub in dashboard:", err);
+    }
+  };
 
   const loadLiveAgents = async () => {
     try {
@@ -40,6 +56,9 @@ export default function Dashboard({ stats, agents: initialAgents }) {
       alert(err.message || "Oʻchirishda xatolik");
     }
   };
+
+  const currentPlanId = localSub?.subscription_plan || "free";
+  const isPlanActive = localSub?.plan_status === "active";
 
   const templates = [
     { 
@@ -126,6 +145,70 @@ export default function Dashboard({ stats, agents: initialAgents }) {
 
   return (
     <div className="space-y-6 pb-28 text-white">
+      {/* Active Subscription Status Banner */}
+      {localSub && (
+        <div className={`rounded-2xl border p-4 sm:p-5 backdrop-blur-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl transition-all ${
+          currentPlanId !== "free" 
+            ? "bg-gradient-to-r from-emerald-950/40 via-[#0E1B17] to-teal-950/30 border-emerald-500/40 shadow-emerald-500/10" 
+            : "bg-gradient-to-r from-blue-900/30 via-indigo-900/20 to-purple-900/30 border-blue-500/30"
+        }`}>
+          <div className="flex items-start space-x-3.5">
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${
+              currentPlanId !== "free" 
+                ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/20" 
+                : "bg-blue-500/20 border-blue-500/30 text-blue-400"
+            }`}>
+              <Crown className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t("current_plan_badge")}:</span>
+                <span className={`px-2.5 py-0.5 rounded-full border text-[11px] font-extrabold uppercase flex items-center gap-1 ${
+                  currentPlanId !== "free" 
+                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.3)]" 
+                    : "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                }`}>
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>{currentPlanId === "free" ? "Free Trial" : `${currentPlanId.toUpperCase()} PLAN`}</span>
+                  <span>({t("current_plan_status_active")})</span>
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed max-w-xl">
+                {currentPlanId === "free" && t("current_plan_no_sub")}
+                {currentPlanId === "starter" && (t("current_plan_starter_active_desc") || t("starter_desc"))}
+                {currentPlanId === "pro" && (t("current_plan_pro_active_desc") || t("pro_desc"))}
+                {currentPlanId === "enterprise" && (t("current_plan_enterprise_active_desc") || t("enterprise_desc"))}
+              </p>
+              {currentPlanId !== "free" && (
+                <div className="flex items-center flex-wrap gap-2 pt-1 text-[11px] font-semibold text-emerald-400">
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20">
+                    <Clock className="w-3 h-3" />
+                    <span>{localSub.days_left !== null ? `${localSub.days_left} ${t("current_plan_days_left")}` : "30 kun"}</span>
+                  </span>
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                    <span>🤖 {localSub.max_bots} ta Bot ruxsati</span>
+                  </span>
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                    <span>⚡ 24/7 AI Onlayn Server</span>
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={() => navigate("/pricing")}
+            className={`shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 active:scale-95 ${
+              currentPlanId !== "free"
+                ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                : "bg-blue-600 hover:bg-blue-500 text-white border-blue-500 shadow-md shadow-blue-500/20"
+            }`}
+          >
+            <span>{currentPlanId !== "free" ? t("pricing") : t("starter_cta")}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Hero Welcome Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#141A26] to-[#0E121B] border border-white/[0.08] p-5 sm:p-6 shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.12)]">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />

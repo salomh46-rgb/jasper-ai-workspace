@@ -16,7 +16,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState(null);
   const [agents, setAgents] = useState([]);
-  const [leads, setLeads] = useState([]);
+  const [mySub, setMySub] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,14 +49,16 @@ export default function App() {
 
   const loadData = async () => {
     try {
-      const [statsData, agentsData, leadsData] = await Promise.all([
+      const [statsData, agentsData, leadsData, subData] = await Promise.all([
         api.getOverviewStats().catch(() => null),
         api.getAgents().catch(() => []),
-        api.getLeads().catch(() => [])
+        api.getLeads().catch(() => []),
+        api.getMySubscription().catch(() => null)
       ]);
       setStats(statsData);
       setAgents(agentsData);
       setLeads(leadsData);
+      setMySub(subData);
     } catch (err) {
       console.error('Load data error:', err);
     }
@@ -78,12 +80,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-tg-bg text-tg-text flex flex-col">
-      <Navbar user={user} stats={stats} onRefresh={loadData} />
+      <Navbar user={user} stats={stats} mySub={mySub} onRefresh={loadData} />
       
       <main className="flex-1 max-w-4xl w-full mx-auto p-4">
         <Routes>
-          <Route path="/" element={<Dashboard stats={stats} agents={agents} leads={leads} />} />
-          <Route path="/agents" element={<Dashboard stats={stats} agents={agents} leads={leads} />} />
+          <Route path="/" element={<Dashboard stats={stats} agents={agents} leads={leads} mySub={mySub} onRefreshSub={loadData} />} />
+          <Route path="/agents" element={<Dashboard stats={stats} agents={agents} leads={leads} mySub={mySub} onRefreshSub={loadData} />} />
           <Route path="/agents/new" element={<BotConstructor />} />
           <Route path="/agents/:id" element={<BotConstructor />} />
           <Route path="/agents/:agentId/knowledge" element={<KnowledgeHub />} />
