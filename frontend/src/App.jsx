@@ -9,6 +9,7 @@ import KnowledgeHub from './pages/KnowledgeHub';
 import LeadsCRM from './pages/LeadsCRM';
 import AgentTester from './pages/AgentTester';
 import LiveChatInbox from './pages/LiveChatInbox';
+import PaymentsHub from './pages/PaymentsHub';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -88,6 +89,7 @@ export default function App() {
           <Route path="/leads" element={<LeadsCRM />} />
           <Route path="/tester" element={<AgentTester agents={agents} />} />
           <Route path="/chat" element={<LiveChatInbox />} />
+          <Route path="/payments" element={<PaymentsHub />} />
         </Routes>
       </main>
 

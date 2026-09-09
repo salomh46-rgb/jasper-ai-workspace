@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { api } from "../services/api";
 import { 
   Bot, Users, MessageSquare, Plus, ArrowRight, Sparkles, 
   Building2, ShoppingBag, GraduationCap, Wrench, Zap, TrendingUp, ShieldCheck, Play, Trash2, Headphones 

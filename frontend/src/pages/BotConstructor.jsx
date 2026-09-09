@@ -30,7 +30,11 @@ export default function BotConstructor() {
     address: "",
     working_hours: "09:00 - 18:00 (Dush-Shan)",
     system_prompt: "",
-    welcome_message: ""
+    welcome_message: "",
+    click_service_id: "",
+    click_merchant_id: "",
+    payme_merchant_id: "",
+    uzum_card_number: ""
   });
 
   const categories = [
@@ -341,6 +345,68 @@ export default function BotConstructor() {
           <p className="text-[11px] text-slate-400">
             Alohida mijoz boti tokenini kiritsangiz, mijozlar toʻgʻridan-toʻgʻri oʻsha botingizga yozishadi va AI javob qaytaradi.
           </p>
+        </div>
+
+                {/* Payment Integration (Click, Payme, Uzum) */}
+        <div className="rounded-2xl bg-[#0E121B]/90 backdrop-blur-xl border border-white/[0.07] p-4 sm:p-5 space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+              <span className="text-sm">💳</span>
+              <span>To‘lov Integratsiyasi (Click / Payme / Uzum)</span>
+            </h3>
+            <span className="text-[11px] text-emerald-400/70 font-medium">Kassa & Invoicing</span>
+          </div>
+          <p className="text-[11px] text-slate-400">
+            Mijozlar bot orqali to‘lov qilishi uchun Click yoki Payme ma‘lumotlaringizni kiriting.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Click Xizmat ID (Service ID)</label>
+              <input
+                type="text"
+                value={formData.click_service_id}
+                onChange={(e) => setFormData({ ...formData, click_service_id: e.target.value })}
+                placeholder="Masalan: 32456"
+                className="w-full bg-[#07080D] border border-white/[0.08] focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none font-mono"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Click Savdogar ID (Merchant ID)</label>
+              <input
+                type="text"
+                value={formData.click_merchant_id}
+                onChange={(e) => setFormData({ ...formData, click_merchant_id: e.target.value })}
+                placeholder="Masalan: 21450"
+                className="w-full bg-[#07080D] border border-white/[0.08] focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Payme Kassa ID (Merchant ID)</label>
+              <input
+                type="text"
+                value={formData.payme_merchant_id}
+                onChange={(e) => setFormData({ ...formData, payme_merchant_id: e.target.value })}
+                placeholder="Masalan: 64b0f9c2d1e2a3b4c5d6e7f8"
+                className="w-full bg-[#07080D] border border-white/[0.08] focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none font-mono"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Uzum / Karta Raqami (P2P yoki Kassa)</label>
+              <input
+                type="text"
+                value={formData.uzum_card_number}
+                onChange={(e) => setFormData({ ...formData, uzum_card_number: e.target.value })}
+                placeholder="8600 0000 0000 0000"
+                className="w-full bg-[#07080D] border border-white/[0.08] focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none font-mono"
+              />
+            </div>
+          </div>
         </div>
 
         {/* AI Personality & System Prompt */}

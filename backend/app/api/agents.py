@@ -61,6 +61,10 @@ class AgentCreateRequest(BaseModel):
     working_hours: Optional[str] = None
     system_prompt: Optional[str] = None
     welcome_message: Optional[str] = None
+    click_merchant_id: Optional[str] = None
+    click_service_id: Optional[str] = None
+    payme_merchant_id: Optional[str] = None
+    uzum_card_number: Optional[str] = None
 
 class AgentUpdateRequest(BaseModel):
     name: Optional[str] = None
@@ -74,6 +78,10 @@ class AgentUpdateRequest(BaseModel):
     voice_enabled: Optional[bool] = None
     human_takeover_enabled: Optional[bool] = None
     is_active: Optional[bool] = None
+    click_merchant_id: Optional[str] = None
+    click_service_id: Optional[str] = None
+    payme_merchant_id: Optional[str] = None
+    uzum_card_number: Optional[str] = None
 
 class GeneratePromptRequest(BaseModel):
     description: str
@@ -116,6 +124,10 @@ async def list_agents(db: AsyncSession = Depends(get_db), current_user: User = D
             "voice_enabled": a.voice_enabled,
             "human_takeover_enabled": a.human_takeover_enabled,
             "is_active": a.is_active,
+            "click_merchant_id": a.click_merchant_id,
+            "click_service_id": a.click_service_id,
+            "payme_merchant_id": a.payme_merchant_id,
+            "uzum_card_number": a.uzum_card_number,
             "knowledge_count": len(a.knowledge_items),
             "leads_count": len(a.leads),
             "created_at": a.created_at
@@ -143,7 +155,11 @@ async def create_agent(payload: AgentCreateRequest, db: AsyncSession = Depends(g
         address=payload.address,
         working_hours=payload.working_hours,
         system_prompt=sys_prompt,
-        welcome_message=welcome_msg
+        welcome_message=welcome_msg,
+        click_merchant_id=payload.click_merchant_id,
+        click_service_id=payload.click_service_id,
+        payme_merchant_id=payload.payme_merchant_id,
+        uzum_card_number=payload.uzum_card_number
     )
     db.add(agent)
     await db.flush()

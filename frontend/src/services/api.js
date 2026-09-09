@@ -239,6 +239,36 @@ class ApiService {
       body: JSON.stringify({ text })
     });
   }
+  // Payments & Invoicing
+  async getPaymentStats(agentId = null) {
+    let url = '/payments/stats';
+    if (agentId) url += `?agent_id=${agentId}`;
+    return await this.request(url);
+  }
+
+  async getInvoices(agentId = null, status = null) {
+    let url = '/payments';
+    const params = new URLSearchParams();
+    if (agentId) params.append('agent_id', agentId);
+    if (status) params.append('status', status);
+    const qs = params.toString();
+    if (qs) url += `?${qs}`;
+    return await this.request(url);
+  }
+
+  async createInvoice(data) {
+    return await this.request('/payments/create-invoice', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async updateInvoiceStatus(invoiceId, status) {
+    return await this.request(`/payments/${invoiceId}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status })
+    });
+  }
 }
 
 export const api = new ApiService();

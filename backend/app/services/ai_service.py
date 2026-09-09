@@ -26,9 +26,19 @@ class AIService:
                 f"⏰ Ish vaqti: {agent.working_hours or 'Mavjud emas'}\n"
             )
 
+        payment_info = ""
+        if getattr(agent, "click_merchant_id", None) or getattr(agent, "payme_merchant_id", None) or getattr(agent, "uzum_card_number", None):
+            payment_info = (
+                f"\n--- TO'LOV VA KASSA MA'LUMOTLARI ---\n"
+                f"💳 Qabul qilinadigan to'lovlar: Click, Payme, Uzum Bank, Naqd.\n"
+                f"Karta / Ruxsat: {getattr(agent, 'uzum_card_number', 'Kassa orqali')}\n"
+                f"Mijoz to'lov qilmoqchi bo'lsa, to'lov havolasi yoki karta orqali to'lash imkoni borligini xushmuomalalik bilan ayting.\n"
+            )
+
         instructions = f"""{agent.system_prompt}
 
 {company_info}
+{payment_info}
 {knowledge_text}
 
 --- MUHIM KO'RSATMALAR ---

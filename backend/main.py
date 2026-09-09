@@ -11,6 +11,7 @@ from app.api.knowledge import router as knowledge_router
 from app.api.leads import router as leads_router
 from app.api.stats import router as stats_router
 from app.api.conversations import router as conversations_router
+from app.api.payments import router as payments_router
 from app.webhook.router import router as webhook_router
 
 if sys.stdout.encoding != 'utf-8':
@@ -60,6 +61,7 @@ app.include_router(knowledge_router, prefix="/api")
 app.include_router(leads_router, prefix="/api")
 app.include_router(stats_router, prefix="/api")
 app.include_router(conversations_router, prefix="/api")
+app.include_router(payments_router, prefix="/api")
 app.include_router(webhook_router)
 
 @app.get("/")
