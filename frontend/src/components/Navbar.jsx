@@ -1,39 +1,50 @@
 import React from "react";
-import { Bot, RefreshCw } from "lucide-react";
+import { Bot, RefreshCw, Zap, Sparkles } from "lucide-react";
 
-export default function Navbar({ user, onRefresh }) {
+export default function Navbar({ user, stats, onRefresh }) {
   return (
-    <header className="sticky top-0 z-40 bg-tg-surface/90 backdrop-blur-md border-b border-tg-border px-4 py-3 flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-[#07080D]/80 backdrop-blur-xl border-b border-white/[0.07] px-4 py-3 flex items-center justify-between">
       <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
-          <Bot className="w-6 h-6 text-white" />
+        <div className="relative group cursor-pointer">
+          <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl blur-sm opacity-60 group-hover:opacity-100 transition duration-300" />
+          <div className="relative w-10 h-10 rounded-xl bg-[#0E121B] border border-white/10 flex items-center justify-center shadow-lg">
+            <Bot className="w-5 h-5 text-blue-400" />
+          </div>
         </div>
         <div>
-          <div className="flex items-center space-x-1.5">
-            <h1 className="font-bold text-base tracking-tight text-white">Jasper AI</h1>
-            <span className="text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
-              Workspace
+          <div className="flex items-center space-x-2">
+            <h1 className="font-bold text-sm tracking-tight text-white flex items-center gap-1.5">
+              Jasper AI
+            </h1>
+            <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+              Studio
             </span>
           </div>
-          <p className="text-xs text-tg-textSecondary">Telegram AI Agent Studio</p>
+          <div className="flex items-center space-x-1.5 mt-0.5">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+            </span>
+            <p className="text-[11px] text-slate-400 font-medium">Gemini 3.6 Flash • Onlayn</p>
+          </div>
         </div>
       </div>
 
       <div className="flex items-center space-x-2">
         <button 
           onClick={onRefresh}
-          className="p-2 rounded-lg bg-tg-surfaceHover hover:bg-tg-border text-tg-textSecondary hover:text-white transition-all"
+          className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 border border-white/[0.06] text-slate-400 hover:text-white transition-all duration-150"
           title="Yangilash"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
 
-        <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-tg-surfaceHover border border-tg-border">
-          <div className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">
+        <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+          <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center font-bold text-xs shadow-sm">
             {user?.full_name ? user.full_name[0] : "J"}
           </div>
-          <span className="text-xs font-medium text-white max-w-[100px] truncate">
-            {user?.full_name || "Tadbirkor"}
+          <span className="text-xs font-semibold text-slate-200 max-w-[90px] truncate tracking-tight">
+            {user?.full_name || "Jasper"}
           </span>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../services/api";
-import { Bot, Send, User, Sparkles } from "lucide-react";
+import { Bot, Send, User, Sparkles, CheckCircle, Zap } from "lucide-react";
 
 export default function AgentTester({ agents }) {
   const [selectedAgentId, setSelectedAgentId] = useState(agents?.[0]?.id || null);
@@ -56,78 +56,88 @@ export default function AgentTester({ agents }) {
   };
 
   return (
-    <div className="space-y-4 pb-24 h-[calc(100vh-140px)] flex flex-col">
-      {/* Top selector */}
-      <div className="flex items-center justify-between bg-tg-surface border border-tg-border rounded-xl p-3">
+    <div className="space-y-4 pb-28 h-[calc(100vh-140px)] flex flex-col">
+      {/* Top Selector Bar */}
+      <div className="flex items-center justify-between bg-[#0E121B]/90 backdrop-blur-xl border border-white/[0.07] p-3 rounded-2xl shadow-md">
         <div className="flex items-center space-x-2">
           <Bot className="w-5 h-5 text-blue-400" />
-          <span className="text-xs font-semibold text-white">Sinov Agenti:</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Agent:</span>
+          <select
+            value={selectedAgentId || ""}
+            onChange={(e) => setSelectedAgentId(e.target.value)}
+            className="bg-[#07080D] border border-white/[0.08] text-xs font-semibold text-white rounded-xl px-3 py-1.5 outline-none"
+          >
+            {agents && agents.map(a => (
+              <option key={a.id} value={a.id}>{a.name}</option>
+            ))}
+          </select>
         </div>
-        <select
-          value={selectedAgentId || ""}
-          onChange={e => setSelectedAgentId(e.target.value)}
-          className="bg-tg-bg border border-tg-border rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500 font-medium"
-        >
-          {agents?.map(a => (
-            <option key={a.id} value={a.id}>{a.name}</option>
-          ))}
-        </select>
+        <div className="inline-flex items-center space-x-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>Jonli Rejim</span>
+        </div>
       </div>
 
-      {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto space-y-3 p-2">
-        {messages.map((m, idx) => (
+      {/* Chat Stream */}
+      <div className="flex-1 overflow-y-auto space-y-3 p-3 rounded-2xl bg-[#07080D]/90 border border-white/[0.06] shadow-inner">
+        {messages.map((msg, idx) => (
           <div
             key={idx}
-            className={"flex items-start space-x-2.5 " + (m.sender === "customer" ? "flex-row-reverse space-x-reverse" : "")}
+            className={"flex flex-col " + (msg.sender === "customer" ? "items-end" : "items-start")}
           >
-            <div className={"w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0 " + (
-              m.sender === "customer" ? "bg-blue-600 text-white" : "bg-tg-surface border border-blue-500/30 text-blue-400"
-            )}>
-              {m.sender === "customer" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+            <div
+              className={
+                "max-w-[85%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-md " +
+                (msg.sender === "customer"
+                  ? "bg-gradient-to-b from-blue-500 to-blue-600 text-white rounded-tr-sm"
+                  : "bg-[#0E121B] text-slate-100 border border-white/[0.08] rounded-tl-sm")
+              }
+            >
+              {msg.text}
             </div>
 
-            <div className={"max-w-[80%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed space-y-2 " + (
-              m.sender === "customer"
-                ? "bg-blue-600 text-white rounded-tr-none"
-                : "bg-tg-surface border border-tg-border text-white rounded-tl-none shadow-md"
-            )}>
-              <p className="whitespace-pre-wrap">{m.text}</p>
-              
-              {m.lead_data && (
-                <div className="p-2 rounded bg-emerald-500/10 border border-emerald-500/30 text-[11px] text-emerald-300 space-y-0.5">
-                  <div className="font-bold flex items-center space-x-1">
-                    <Sparkles className="w-3 h-3 text-emerald-400" />
-                    <span>Lid Aniqlindi!</span>
-                  </div>
-                  {m.lead_data.customer_name && <div>Ism: {m.lead_data.customer_name}</div>}
-                  {m.lead_data.customer_phone && <div>Tel: {m.lead_data.customer_phone}</div>}
+            {/* Simulated Lead Badge */}
+            {msg.lead_data && msg.lead_data.has_lead && (
+              <div className="mt-2 max-w-[85%] rounded-xl bg-emerald-950/40 border border-emerald-500/30 p-3 space-y-1 text-xs text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)] animate-fade-in">
+                <div className="flex items-center space-x-1.5 font-bold uppercase tracking-wider text-[10px] text-emerald-400">
+                  <CheckCircle className="w-3.5 h-3.5" />
+                  <span>CRM ga Yangi Lid Saqlandi!</span>
                 </div>
-              )}
-            </div>
+                <div className="text-slate-200">
+                  <span className="font-semibold">{msg.lead_data.customer_name || "Mijoz"}</span> • 
+                  <span className="font-mono text-emerald-300 ml-1">{msg.lead_data.customer_phone}</span>
+                </div>
+                {msg.lead_data.summary && (
+                  <p className="text-[11px] text-slate-400 italic mt-0.5">{msg.lead_data.summary}</p>
+                )}
+              </div>
+            )}
           </div>
         ))}
+
         {loading && (
-          <div className="flex items-center space-x-2 text-tg-textSecondary text-xs p-2">
-            <Bot className="w-4 h-4 animate-bounce text-blue-400" />
-            <span>AI javob yozmoqda...</span>
+          <div className="flex items-center space-x-2 text-slate-400 p-2">
+            <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce" />
+            <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce delay-100" />
+            <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce delay-200" />
+            <span className="text-xs text-slate-500 font-medium ml-1">Gemini AI javob yozmoqda...</span>
           </div>
         )}
       </div>
 
-      {/* Input */}
-      <form onSubmit={handleSend} className="flex items-center space-x-2 pt-2">
+      {/* Input bar */}
+      <form onSubmit={handleSend} className="flex items-center space-x-2">
         <input
           type="text"
           value={inputText}
-          onChange={e => setInputText(e.target.value)}
-          placeholder="AI agentga savol bering (masalan: Narxlar qancha?)..."
-          className="flex-1 bg-tg-surface border border-tg-border rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-blue-500 placeholder:text-tg-textSecondary"
+          onChange={(e) => setInputText(e.target.value)}
+          placeholder="AI Agentga savol bering yoki buyurtma qoldiring..."
+          className="flex-1 bg-[#0E121B] border border-white/[0.08] focus:border-blue-500/50 rounded-xl px-4 py-3 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition-all shadow-inner"
         />
         <button
           type="submit"
           disabled={!inputText.trim() || loading}
-          className="p-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-xl shadow-lg shadow-blue-600/30 transition-all"
+          className="p-3 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white shadow-md shadow-blue-600/30 active:scale-95 disabled:opacity-40 transition-all"
         >
           <Send className="w-4 h-4" />
         </button>
