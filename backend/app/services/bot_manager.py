@@ -49,13 +49,22 @@ class BotManager:
                     "username": message.from_user.username
                 }
                 text = message.text or ""
+                voice_bytes = None
                 if message.voice:
-                    text = "[Ovozli xabar yuborildi]"
+                    try:
+                        file_info = await bot.get_file(message.voice.file_id)
+                        bio = await bot.download_file(file_info.file_path)
+                        voice_bytes = bio.getvalue() if hasattr(bio, "getvalue") else bio.read()
+                        text = "🎙️ [Ovozli xabar]"
+                    except Exception as e:
+                        logger.error(f"Error downloading voice: {e}")
+                        text = "[Ovozli xabar yuborildi]"
 
                 reply = await cls.handle_customer_message(
                     bot_token=bot_token,
                     telegram_user=from_user,
-                    message_text=text
+                    message_text=text,
+                    voice_bytes=voice_bytes
                 )
                 if reply:
                     await message.answer(reply, parse_mode="HTML")
@@ -79,7 +88,13 @@ class BotManager:
         logger.info(f"🛑 Agent Bot ({bot_token[:8]}...) to'xtatildi.")
 
     @classmethod
-    async def handle_customer_message(cls, bot_token: str, telegram_user: dict, message_text: str) -> str:
+    async def handle_customer_message(
+        cls,
+        bot_token: str,
+        telegram_user: dict,
+        message_text: str,
+        voice_bytes: bytes = None
+    ) -> str:
         async with AsyncSessionLocal() as db:
             # 1. Find agent by bot token
             stmt = select(Agent).where(Agent.bot_token == bot_token, Agent.is_active == True).options(
@@ -97,7 +112,7 @@ class BotManager:
                 welcome = agent.welcome_message or f"Assalomu alaykum! Men {agent.name} xizmatining aqlli yordamchisiman. Sizga qanday yordam bera olaman?"
                 return welcome
 
-            # 2. Get or create conversation
+            # 2. Get or create conversation (Strict Multi-Tenant Isolation per Agent & Customer)
             customer_tg_id = telegram_user.get("id")
             customer_name = telegram_user.get("first_name", "") + " " + (telegram_user.get("last_name") or "")
             customer_name = customer_name.strip() or "Mijoz"
@@ -151,13 +166,21 @@ class BotManager:
                 for m in conversation.messages[-6:]:
                     history.append({"sender": m.sender, "text": m.text})
 
-            # 5. Generate AI response via Gemini
-            ai_res = await AIService.generate_response(
-                agent=agent,
-                knowledge_items=agent.knowledge_items,
-                chat_history=history,
-                user_message=message_text
-            )
+            # 5. Generate AI response via Gemini (Voice or Text)
+            if voice_bytes:
+                ai_res = await AIService.process_voice_message(
+                    agent=agent,
+                    knowledge_items=agent.knowledge_items,
+                    chat_history=history,
+                    audio_bytes=voice_bytes
+                )
+            else:
+                ai_res = await AIService.generate_response(
+                    agent=agent,
+                    knowledge_items=agent.knowledge_items,
+                    chat_history=history,
+                    user_message=message_text
+                )
             reply_text = ai_res["reply"]
             lead_data = ai_res.get("lead_data")
 
