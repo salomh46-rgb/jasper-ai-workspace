@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
+import { useLanguage } from "../i18n/LanguageContext";
 import { 
   Save, ArrowLeft, Sparkles, Building2, ShoppingBag, 
   GraduationCap, Wrench, Key, BookOpen, Check, Wand2, X, Trash2,
@@ -8,6 +9,7 @@ import {
 } from "lucide-react";
 
 export default function BotConstructor() {
+  const { t } = useLanguage();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get("category") || "clinic";
@@ -40,15 +42,16 @@ export default function BotConstructor() {
   });
 
   const categories = [
-    { id: "emergency", label: "Tez Yordam (103)", icon: Activity },
-    { id: "clinic", label: "Klinika", icon: Building2 },
-    { id: "shop", label: "Do‘kon", icon: ShoppingBag },
-    { id: "education", label: "O‘quv Markaz", icon: GraduationCap },
-    { id: "restaurant", label: "Restoran & Kafe", icon: Utensils },
-    { id: "craftsman", label: "Usta & Servis", icon: Wrench },
-    { id: "realestate", label: "Ko‘chmas Mulk", icon: Home },
-    { id: "custom", label: "Maxsus / Oʻz Sohangiz", icon: Wand2 },
+    { id: "emergency", label: t("cat_emergency"), icon: Activity },
+    { id: "clinic", label: t("cat_clinic"), icon: Building2 },
+    { id: "shop", label: t("cat_shop"), icon: ShoppingBag },
+    { id: "education", label: t("cat_education"), icon: GraduationCap },
+    { id: "restaurant", label: t("cat_restaurant"), icon: Utensils },
+    { id: "craftsman", label: t("cat_craftsman"), icon: Wrench },
+    { id: "realestate", label: t("cat_realestate"), icon: Home },
+    { id: "custom", label: t("cat_custom"), icon: Wand2 },
   ];
+
 
   useEffect(() => {
     loadTemplates();
@@ -199,10 +202,10 @@ export default function BotConstructor() {
           </button>
           <div>
             <h2 className="text-base sm:text-lg font-extrabold text-white tracking-tight">
-              {id && id !== "new" ? "Agent Sozlamalari" : "Yangi AI Agent Yaratish"}
+              {id && id !== "new" ? t("constructor_header_edit") : t("constructor_header_new")}
             </h2>
             <p className="text-xs text-slate-400">
-              Istalgan soha uchun erkin, qoliplarga cheklanmagan AI operator yarating
+              {t("constructor_subtitle")}
             </p>
           </div>
         </div>
@@ -213,7 +216,7 @@ export default function BotConstructor() {
           className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-purple-400/30 text-xs font-semibold shadow-lg shadow-purple-500/20 active:scale-95 transition-all"
         >
           <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-          <span>✨ AI Bilan Yaratish</span>
+          <span>{t("btn_ai_wizard")}</span>
         </button>
       </div>
 
@@ -221,12 +224,12 @@ export default function BotConstructor() {
         {/* Category Segmented Control */}
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
-            Soha / Biznes Yoʻnalishi
+            {t("cat_title")}
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {categories.map((cat) => {
               const Icon = cat.icon;
-              const isSelected = formData.category === cat.id || (cat.id === "custom" && !["clinic", "shop", "education", "craftsman"].includes(formData.category));
+              const isSelected = formData.category === cat.id || (cat.id === "custom" && !["clinic", "shop", "education", "craftsman", "emergency", "restaurant", "realestate"].includes(formData.category));
               return (
                 <button
                   key={cat.id}
@@ -246,7 +249,7 @@ export default function BotConstructor() {
             })}
           </div>
 
-          {!["clinic", "shop", "education", "craftsman"].includes(formData.category) && (
+          {!["clinic", "shop", "education", "craftsman", "emergency", "restaurant", "realestate"].includes(formData.category) && (
             <div className="pt-1.5 animate-fade-in">
               <input
                 type="text"
@@ -255,7 +258,7 @@ export default function BotConstructor() {
                   setCustomCategoryName(e.target.value);
                   setFormData(prev => ({ ...prev, category: e.target.value || "custom" }));
                 }}
-                placeholder="Oʻz sohangiz nomini kiriting (masalan: Restoran, Avtosalon, Mehmonxona, Mebel ishlab chiqarish...)"
+                placeholder={t("cat_custom_placeholder")}
                 className="w-full bg-[#07080D] border border-blue-500/40 focus:border-blue-500 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none"
               />
             </div>
@@ -266,12 +269,12 @@ export default function BotConstructor() {
         <div className="rounded-2xl bg-[#0E121B]/90 backdrop-blur-xl border border-white/[0.07] p-4 sm:p-5 space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
           <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Asosiy Maʻlumotlar</span>
+            <span>{t("basic_info")}</span>
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-300">Agent Nomi</label>
+              <label className="text-xs font-medium text-slate-300">{t("agent_name")}</label>
               <input
                 type="text"
                 required
@@ -283,7 +286,7 @@ export default function BotConstructor() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-300">Tashkilot / Kompaniya Nomi</label>
+              <label className="text-xs font-medium text-slate-300">{t("company_name")}</label>
               <input
                 type="text"
                 value={formData.company_name}
@@ -296,7 +299,7 @@ export default function BotConstructor() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-300">Telefon Raqam</label>
+              <label className="text-xs font-medium text-slate-300">{t("phone_number")}</label>
               <input
                 type="text"
                 value={formData.phone_number}
@@ -307,7 +310,7 @@ export default function BotConstructor() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-300">Manzil</label>
+              <label className="text-xs font-medium text-slate-300">{t("address")}</label>
               <input
                 type="text"
                 value={formData.address}
@@ -318,7 +321,7 @@ export default function BotConstructor() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-300">Ish Vaqti</label>
+              <label className="text-xs font-medium text-slate-300">{t("working_hours")}</label>
               <input
                 type="text"
                 value={formData.working_hours}
@@ -335,14 +338,14 @@ export default function BotConstructor() {
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
               <Key className="w-3.5 h-3.5" />
-              <span>Telegram Bot Tokeni (Ixtiyoriy)</span>
+              <span>{t("tg_token_title")}</span>
             </h3>
             <button
               type="button"
               onClick={() => setShowBotFatherGuide(!showBotFatherGuide)}
               className="text-[11px] text-amber-400 hover:text-amber-300 font-semibold underline flex items-center gap-1 cursor-pointer"
             >
-              <span>{showBotFatherGuide ? "Yo'riqnomani yopish ▲" : "💡 Token olish yo'riqnomasi ▼"}</span>
+              <span>{showBotFatherGuide ? t("tg_token_guide_close") : t("tg_token_guide_open")}</span>
             </button>
           </div>
 
@@ -354,7 +357,7 @@ export default function BotConstructor() {
                 <li><code className="px-1.5 py-0.5 rounded bg-black/40 text-amber-300 font-mono">/newbot</code> buyrug'ini yuboring.</li>
                 <li>Botingiz nomini kiriting (Masalan: <span className="text-white">Mening Do'konim</span>).</li>
                 <li>Botingiz uchun username kiriting (oxiri <span className="text-white">_bot</span> bilan tugashi shart, masalan: <span className="text-white">mening_dokonim_ai_bot</span>).</li>
-                <li>BotFather sizga <span className="text-emerald-400 font-semibold">HTTP API Token</span> beradi (Masalan: <code className="px-1 bg-black/40 text-emerald-300 font-mono text-[10px]">8732339175:AAFi9X...</code>). Uni nusxalab quyidagi maydonga joylang!</li>
+                <li>BotFather sizga <span className="text-emerald-400 font-semibold">HTTP API Token</span> beradi. Uni nusxalab quyidagi maydonga joylang!</li>
               </ol>
             </div>
           )}
@@ -367,26 +370,26 @@ export default function BotConstructor() {
             className="w-full bg-[#07080D] border border-white/[0.08] focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none font-mono"
           />
           <p className="text-[11px] text-slate-400">
-            Alohida mijoz boti tokenini kiritsangiz, mijozlar toʻgʻridan-toʻgʻri oʻsha botingizga yozishadi va AI javob qaytaradi.
+            {t("tg_token_sub")}
           </p>
         </div>
 
-                {/* Payment Integration (Click, Payme, Uzum) */}
+        {/* Payment Integration (Click, Payme, Uzum) */}
         <div className="rounded-2xl bg-[#0E121B]/90 backdrop-blur-xl border border-white/[0.07] p-4 sm:p-5 space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
               <span className="text-sm">💳</span>
-              <span>To‘lov Integratsiyasi (Click / Payme / Uzum)</span>
+              <span>{t("payment_integration_title")}</span>
             </h3>
             <span className="text-[11px] text-emerald-400/70 font-medium">Kassa & Invoicing</span>
           </div>
           <p className="text-[11px] text-slate-400">
-            Mijozlar bot orqali to‘lov qilishi uchun Click yoki Payme ma‘lumotlaringizni kiriting.
+            {t("payment_integration_sub")}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-300">Click Xizmat ID (Service ID)</label>
+              <label className="text-xs font-medium text-slate-300">{t("click_service_id")}</label>
               <input
                 type="text"
                 value={formData.click_service_id}
@@ -397,7 +400,7 @@ export default function BotConstructor() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-300">Click Savdogar ID (Merchant ID)</label>
+              <label className="text-xs font-medium text-slate-300">{t("click_merchant_id")}</label>
               <input
                 type="text"
                 value={formData.click_merchant_id}
@@ -410,7 +413,7 @@ export default function BotConstructor() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-300">Payme Kassa ID (Merchant ID)</label>
+              <label className="text-xs font-medium text-slate-300">{t("payme_merchant_id")}</label>
               <input
                 type="text"
                 value={formData.payme_merchant_id}
@@ -421,7 +424,7 @@ export default function BotConstructor() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-300">Uzum / Karta Raqami (P2P yoki Kassa)</label>
+              <label className="text-xs font-medium text-slate-300">{t("uzum_card_number")}</label>
               <input
                 type="text"
                 value={formData.uzum_card_number}
@@ -438,7 +441,7 @@ export default function BotConstructor() {
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>AI Xarakteri & Koʻrsatmalar</span>
+              <span>{t("ai_persona_title")}</span>
             </h3>
 
             <button
@@ -447,28 +450,28 @@ export default function BotConstructor() {
               className="text-xs font-semibold text-purple-400 hover:text-purple-300 flex items-center gap-1"
             >
               <Wand2 className="w-3.5 h-3.5" />
-              <span>AI bilan avtomatik yozish</span>
+              <span>{t("ai_auto_prompt_btn")}</span>
             </button>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-300">Salomlashish Xabari (/start)</label>
+            <label className="text-xs font-medium text-slate-300">{t("welcome_msg_title")}</label>
             <input
               type="text"
               value={formData.welcome_message}
               onChange={(e) => setFormData({ ...formData, welcome_message: e.target.value })}
-              placeholder="Assalomu alaykum! Xizmatimizga xush kelibsiz..."
+              placeholder={t("welcome_msg_placeholder")}
               className="w-full bg-[#07080D] border border-white/[0.08] focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-300">Tizim Koʻrsatmasi (System Prompt)</label>
+            <label className="text-xs font-medium text-slate-300">{t("system_prompt_title")}</label>
             <textarea
               rows={4}
               value={formData.system_prompt}
               onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
-              placeholder="Siz kompaniyaning aqlli va xushmuomala AI konsultantisiz..."
+              placeholder={t("system_prompt_placeholder")}
               className="w-full bg-[#07080D] border border-white/[0.08] focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none leading-relaxed"
             />
           </div>
@@ -479,27 +482,28 @@ export default function BotConstructor() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full inline-flex items-center justify-center space-x-2 py-3.5 px-6 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-bold text-sm shadow-[0_0_25px_-4px_rgba(59,130,246,0.6),inset_0_1px_0_rgba(255,255,255,0.3)] active:scale-98 transition-all duration-150 disabled:opacity-50"
+            className="w-full inline-flex items-center justify-center space-x-2 py-3.5 px-6 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-bold text-sm shadow-[0_0_25px_-4px_rgba(59,130,246,0.6),inset_0_1px_0_rgba(255,255,255,0.3)] active:scale-98 transition-all duration-150 disabled:opacity-50 cursor-pointer"
           >
             {savedSuccess ? (
               <>
                 <Check className="w-5 h-5 text-white" />
-                <span>Muvaffaqiyatli Saqlandi!</span>
+                <span>{t("btn_saved_success")}</span>
               </>
             ) : saving ? (
               <>
                 <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                <span>Saqlanmoqda...</span>
+                <span>{t("btn_saving")}</span>
               </>
             ) : (
               <>
                 <Save className="w-4 h-4" />
-                <span>Agentni Saqlash & Bilimlar Bazasi</span>
+                <span>{t("btn_save_agent")}</span>
               </>
             )}
           </button>
         </div>
       </form>
+
 
       {/* AI Prompt Generator Modal */}
       {showAIPromptModal && (

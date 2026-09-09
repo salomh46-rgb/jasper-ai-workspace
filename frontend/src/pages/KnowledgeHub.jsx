@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
+import { useLanguage } from "../i18n/LanguageContext";
 import { 
   Plus, Trash2, ArrowLeft, BookOpen, Sparkles, 
   Search, FileText, CheckCircle2, X, UploadCloud, 
@@ -11,6 +12,7 @@ import {
 export default function KnowledgeHub() {
   const { agentId } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   
   const [agent, setAgent] = useState(null);
   const [knowledge, setKnowledge] = useState([]);
@@ -34,15 +36,15 @@ export default function KnowledgeHub() {
   const [uploadCustomCategory, setUploadCustomCategory] = useState("");
 
   const categories = [
-    { id: "service", label: "Xizmatlar & Tavsif" },
-    { id: "price", label: "Narxlar & Prayst-list" },
-    { id: "policy", label: "Qoidalar, Ko‘rsatmalar & Manzil" },
-    { id: "medical", label: "Tibbiy Standartlar & Shoshilinch Yordam (103)" },
-    { id: "education", label: "Darslar, Kurslar & Ta‘lim Dasturi" },
-    { id: "delivery", label: "Yetkazib Berish & Lokatsiya" },
-    { id: "faq", label: "Savol-Javob (FAQ)" },
-    { id: "promo", label: "Aksiya & Chegirma" },
-    { id: "custom", label: "✏️ O‘z Kategoriya Nomingizni Yozish..." },
+    { id: "service", label: t("kb_cat_service") },
+    { id: "price", label: t("kb_cat_price") },
+    { id: "policy", label: t("kb_cat_policy") },
+    { id: "medical", label: t("kb_cat_medical") },
+    { id: "education", label: t("kb_cat_education") },
+    { id: "delivery", label: t("kb_cat_delivery") },
+    { id: "faq", label: t("kb_cat_faq") },
+    { id: "promo", label: t("kb_cat_promo") },
+    { id: "custom", label: t("kb_cat_custom") },
   ];
 
   useEffect(() => {
@@ -147,7 +149,7 @@ export default function KnowledgeHub() {
       {showSuccessToast && (
         <div className="fixed top-6 right-6 z-50 bg-emerald-500 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce">
           <CheckCircle2 className="w-5 h-5" />
-          <span className="text-sm font-bold">Agent va Bilimlar Bazasi Muvaffaqiyatli Saqlandi! 🚀</span>
+          <span className="text-sm font-bold">{t("kb_toast_success")}</span>
         </div>
       )}
 
@@ -157,7 +159,7 @@ export default function KnowledgeHub() {
           <button 
             onClick={() => navigate("/")}
             className="p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] text-white/70 hover:text-white transition active:scale-95"
-            title="Bosh sahifaga qaytish"
+            title={t("back")}
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -165,14 +167,14 @@ export default function KnowledgeHub() {
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-blue-400" />
-                <span>Bilimlar Bazasi (Smart RAG)</span>
+                <span>{t("kb_title")}</span>
               </h1>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                {knowledge.length} ta bilim
+                {knowledge.length} {t("kb_badge_count")}
               </span>
             </div>
             <p className="text-xs text-white/50 mt-0.5">
-              {agent ? `${agent.name} AI agenti uchun maxsus bilim va qoidalar arxivi` : "AI bilimlari"}
+              {agent ? `${agent.name} ${t("kb_agent_archive")}` : t("kb_subtitle")}
             </p>
           </div>
         </div>
@@ -184,7 +186,7 @@ export default function KnowledgeHub() {
             className="px-3.5 py-2 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-300 text-xs font-semibold flex items-center gap-2 transition active:scale-95"
           >
             <UploadCloud className="w-4 h-4 text-purple-400" />
-            <span>📁 Fayl Yuklash (PDF/Excel)</span>
+            <span>{t("kb_btn_upload")}</span>
           </button>
 
           <button
@@ -192,7 +194,7 @@ export default function KnowledgeHub() {
             className="px-3.5 py-2 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 text-blue-300 text-xs font-semibold flex items-center gap-2 transition active:scale-95"
           >
             <Plus className="w-4 h-4 text-blue-400" />
-            <span>✍️ Yozma Qo‘shish</span>
+            <span>{t("kb_btn_manual")}</span>
           </button>
 
           <button
@@ -200,7 +202,7 @@ export default function KnowledgeHub() {
             className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition active:scale-95"
           >
             <Check className="w-4 h-4" />
-            <span>✅ Saqlash & Ishga Tushirish</span>
+            <span>{t("kb_btn_save_launch")}</span>
           </button>
         </div>
       </div>
@@ -210,7 +212,7 @@ export default function KnowledgeHub() {
         <Search className="absolute left-3.5 top-3 w-4 h-4 text-white/40" />
         <input
           type="text"
-          placeholder="Bilimlar, qoidalar, narxlar yoki mavzular bo‘yicha qidirish..."
+          placeholder={t("kb_search_placeholder")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full bg-[#0a0c13] border border-white/[0.08] focus:border-blue-500/50 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder:text-white/30 focus:outline-none"
@@ -222,22 +224,22 @@ export default function KnowledgeHub() {
         {filteredKnowledge.length === 0 ? (
           <div className="p-12 text-center rounded-3xl bg-white/[0.01] border border-dashed border-white/[0.08]">
             <BookOpen className="w-10 h-10 text-white/20 mx-auto mb-3" />
-            <h3 className="text-sm font-semibold text-white/70">Hozircha bilimlar kiritilmagan</h3>
+            <h3 className="text-sm font-semibold text-white/70">{t("kb_empty_title")}</h3>
             <p className="text-xs text-white/40 mt-1 max-w-sm mx-auto">
-              Korxonangiz xizmatlari, narxlar, manzil va qoidalari haqida ma‘lumot qo‘shing yoki PDF/Excel faylingizni yuklang.
+              {t("kb_empty_desc")}
             </p>
             <div className="mt-4 flex justify-center gap-2">
               <button
                 onClick={() => setShowAddModal(true)}
                 className="px-4 py-2 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs font-semibold"
               >
-                + Yozma bilim kiritish
+                {t("kb_btn_manual_add")}
               </button>
               <button
                 onClick={() => setShowUploadModal(true)}
                 className="px-4 py-2 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-semibold"
               >
-                📁 Fayl yuklash
+                {t("kb_btn_upload_add")}
               </button>
             </div>
           </div>
@@ -250,14 +252,14 @@ export default function KnowledgeHub() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                    {item.category || "Ma'lumot"}
+                    {item.category || t("all")}
                   </span>
                   <h3 className="text-sm font-bold text-white">{item.title}</h3>
                 </div>
                 <button
                   onClick={() => handleDelete(item.id)}
                   className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition opacity-80 hover:opacity-100"
-                  title="O'chirish"
+                  title={t("delete")}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -279,8 +281,8 @@ export default function KnowledgeHub() {
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-xs font-bold text-white">Bilimlar bazasi faollashtirildi</div>
-              <div className="text-[10px] text-white/50">{knowledge.length} ta bilim AI xotirasida saqlandi</div>
+              <div className="text-xs font-bold text-white">{t("kb_sticky_active")}</div>
+              <div className="text-[10px] text-white/50">{knowledge.length} {t("kb_sticky_count")}</div>
             </div>
           </div>
 
@@ -288,7 +290,7 @@ export default function KnowledgeHub() {
             onClick={handleFinishAndSave}
             className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition"
           >
-            <span>Boshqaruv Paneliga O‘tish</span>
+            <span>{t("kb_btn_to_dashboard")}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -301,7 +303,7 @@ export default function KnowledgeHub() {
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-blue-400" />
-                <h3 className="text-base font-bold text-white">Yozma Bilim Qo‘shish</h3>
+                <h3 className="text-base font-bold text-white">{t("kb_modal_add_title")}</h3>
               </div>
               <button
                 type="button"
@@ -314,7 +316,7 @@ export default function KnowledgeHub() {
 
             <form onSubmit={handleAdd} className="space-y-4">
               <div>
-                <label className="text-xs text-white/60 font-medium block mb-1">Kategoriya / Mavzu Guruhi:</label>
+                <label className="text-xs text-white/60 font-medium block mb-1">{t("kb_cat_select_label")}</label>
                 <select
                   value={newItem.category}
                   onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
@@ -328,11 +330,11 @@ export default function KnowledgeHub() {
 
               {newItem.category === "custom" && (
                 <div>
-                  <label className="text-xs text-emerald-400 font-medium block mb-1">O‘z Kategoriya Nomingizni Kiriting:</label>
+                  <label className="text-xs text-emerald-400 font-medium block mb-1">{t("kb_custom_cat_label")}</label>
                   <input
                     type="text"
                     required
-                    placeholder="Masalan: Shoshilinch Ko'rsatmalar, Dori-Darmonlar, Kafolat..."
+                    placeholder={t("kb_custom_cat_placeholder")}
                     value={newItem.custom_category}
                     onChange={(e) => setNewItem({ ...newItem, custom_category: e.target.value })}
                     className="w-full bg-[#12141c] border border-emerald-500/40 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500"
@@ -341,11 +343,11 @@ export default function KnowledgeHub() {
               )}
 
               <div>
-                <label className="text-xs text-white/60 font-medium block mb-1">Mavzu / Xizmat Nomi *:</label>
+                <label className="text-xs text-white/60 font-medium block mb-1">{t("kb_topic_label")}</label>
                 <input
                   type="text"
                   required
-                  placeholder="Masalan: 103 Tez Yordam Chaqirish Qoidalari va Manzil Berish Tartibi"
+                  placeholder={t("kb_topic_placeholder")}
                   value={newItem.title}
                   onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
                   className="w-full bg-[#12141c] border border-white/[0.08] rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50"
@@ -353,11 +355,11 @@ export default function KnowledgeHub() {
               </div>
 
               <div>
-                <label className="text-xs text-white/60 font-medium block mb-1">Batafsil Ma‘lumot & Ko‘rsatmalar *:</label>
+                <label className="text-xs text-white/60 font-medium block mb-1">{t("kb_content_label")}</label>
                 <textarea
                   required
                   rows={6}
-                  placeholder="Barcha qoidalar, narxlar, shartlar va yo'riqnomalarni batafsil yozing..."
+                  placeholder={t("kb_content_placeholder")}
                   value={newItem.content}
                   onChange={(e) => setNewItem({ ...newItem, content: e.target.value })}
                   className="w-full bg-[#12141c] border border-white/[0.08] rounded-xl p-3 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50 resize-none font-sans leading-relaxed"
@@ -370,14 +372,14 @@ export default function KnowledgeHub() {
                   onClick={() => setShowAddModal(false)}
                   className="px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs font-semibold text-white/70"
                 >
-                  Bekor qilish
+                  {t("cancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
                   className="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-xs font-bold text-white shadow-lg shadow-blue-500/20 active:scale-95 transition"
                 >
-                  {saving ? "Saqlanmoqda..." : "💾 Bilimni Saqlash"}
+                  {saving ? t("kb_btn_saving") : t("kb_btn_save_item")}
                 </button>
               </div>
             </form>
@@ -392,7 +394,7 @@ export default function KnowledgeHub() {
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
               <div className="flex items-center gap-2">
                 <UploadCloud className="w-5 h-5 text-purple-400" />
-                <h3 className="text-base font-bold text-white">Smart RAG Hujjat Yuklash</h3>
+                <h3 className="text-base font-bold text-white">{t("kb_modal_upload_title")}</h3>
               </div>
               <button
                 type="button"
@@ -405,7 +407,7 @@ export default function KnowledgeHub() {
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-white/60 font-medium block mb-1">Kategoriya:</label>
+                <label className="text-xs text-white/60 font-medium block mb-1">{t("kb_cat_select_label")}</label>
                 <select
                   value={uploadCategory}
                   onChange={(e) => setUploadCategory(e.target.value)}
@@ -419,10 +421,10 @@ export default function KnowledgeHub() {
 
               {uploadCategory === "custom" && (
                 <div>
-                  <label className="text-xs text-emerald-400 font-medium block mb-1">O‘z Kategoriya Nomi:</label>
+                  <label className="text-xs text-emerald-400 font-medium block mb-1">{t("kb_custom_cat_label")}</label>
                   <input
                     type="text"
-                    placeholder="Masalan: Korporativ Standartlar..."
+                    placeholder={t("kb_custom_cat_placeholder")}
                     value={uploadCustomCategory}
                     onChange={(e) => setUploadCustomCategory(e.target.value)}
                     className="w-full bg-[#12141c] border border-emerald-500/40 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none"
@@ -442,13 +444,13 @@ export default function KnowledgeHub() {
                   className="hidden"
                 />
                 <UploadCloud className="w-10 h-10 text-purple-400/80 mx-auto mb-2 animate-pulse" />
-                <h4 className="text-xs font-bold text-white">Faylni tanlang yoki shu yerga tashlang</h4>
-                <p className="text-[11px] text-white/40 mt-1">PDF, Excel (.xlsx), Text yoki Rasm Menyular (10 MB gacha)</p>
+                <h4 className="text-xs font-bold text-white">{t("kb_file_drag_title")}</h4>
+                <p className="text-[11px] text-white/40 mt-1">{t("kb_file_drag_sub")}</p>
               </div>
 
               {uploading && (
                 <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-center text-xs text-purple-300 animate-pulse">
-                  Gemini AI fayl mazmunini tahlil qilmoqda...
+                  {t("kb_ai_analyzing")}
                 </div>
               )}
 

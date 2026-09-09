@@ -4,8 +4,10 @@ import {
   CreditCard, Smartphone, Send, Copy, HelpCircle, Star, Globe, MessageSquare, Headphones, Lock
 } from "lucide-react";
 import { api } from "../services/api";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function PricingHub() {
+  const { t } = useLanguage();
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [copiedCard, setCopiedCard] = useState(false);
@@ -22,13 +24,13 @@ export default function PricingHub() {
   const plans = [
     {
       id: "starter",
-      name: "Boshlang'ich (Starter)",
+      name: t("starter_plan"),
       price: "149,000",
       period: "oyiga",
       popular: false,
-      badge: "Kichik Biznes & Startap",
+      badge: t("starter_badge"),
       badgeColor: "text-slate-400 bg-white/[0.05] border-white/10",
-      desc: "Kichik do'kon va servislar uchun bitta aqlli AI yordamchi.",
+      desc: t("starter_desc"),
       features: [
         "1 ta Telegram AI Bot",
         "1,000 ta xabar / oy",
@@ -37,18 +39,18 @@ export default function PricingHub() {
         "Cheksiz Bilimlar bazasi",
         "24/7 Ishonchli ishlash"
       ],
-      cta: "Boshlang'ichni Tanlash",
+      cta: t("starter_cta"),
       accent: "border-white/10 hover:border-blue-500/30"
     },
     {
       id: "pro",
-      name: "Professional (Pro)",
+      name: t("pro_plan"),
       price: "349,000",
       period: "oyiga",
       popular: true,
-      badge: "Eng Ommabop & Tavsiya",
+      badge: t("pro_badge"),
       badgeColor: "text-blue-400 bg-blue-500/10 border-blue-500/20",
-      desc: "O'rta biznes, klinikalar va do'konlar uchun to'liq imkoniyatlar to'plami.",
+      desc: t("pro_desc"),
       features: [
         "3 ta Telegram AI Bot",
         "10,000 ta xabar / oy",
@@ -59,18 +61,18 @@ export default function PricingHub() {
         "⚡ 0.0s Sub-Second Ultra Tezlik",
         "Prioritetli qo'llab-quvvatlash"
       ],
-      cta: "Pro Tarifni Tanlash",
+      cta: t("pro_cta"),
       accent: "border-blue-500/50 shadow-[0_0_30px_rgba(59,130,246,0.2)] bg-gradient-to-b from-[#121929] to-[#0E121B]"
     },
     {
       id: "enterprise",
-      name: "Korporativ (Enterprise)",
+      name: t("enterprise_plan"),
       price: "790,000",
       period: "oyiga",
       popular: false,
-      badge: "Katta Kompaniyalar",
+      badge: t("enterprise_badge"),
       badgeColor: "text-purple-400 bg-purple-500/10 border-purple-500/20",
-      desc: "Katta brendlar, call-centerlar va shaxsiy integratsiya talab qiluvchilar uchun.",
+      desc: t("enterprise_desc"),
       features: [
         "Cheksiz Telegram AI Botlar",
         "Cheksiz xabarlar",
@@ -80,7 +82,7 @@ export default function PricingHub() {
         "Shaxsiy Server & Maxfiylik",
         "24/7 Shaxsiy menejer"
       ],
-      cta: "Enterprise Tanlash",
+      cta: t("enterprise_cta"),
       accent: "border-purple-500/30 hover:border-purple-500/50"
     }
   ];
@@ -122,13 +124,13 @@ export default function PricingHub() {
       <div className="text-center space-y-3 pt-2">
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Shaffof va Qulay Tariflar</span>
+          <span>{t("pricing_header_badge")}</span>
         </div>
         <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
-          Biznesingizni AI Bilan Kuchaytiring
+          {t("pricing_main_title")}
         </h2>
         <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">
-          Hech qanday murakkab shartnomalarsiz — kartangiz, Click / Payme yoki Telegram Stars orqali 1 daqiqada obuna bo'ling!
+          {t("pricing_main_desc")}
         </p>
       </div>
 
@@ -143,7 +145,7 @@ export default function PricingHub() {
           >
             {plan.popular && (
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-[11px] font-bold tracking-wider uppercase text-white shadow-lg shadow-blue-500/40">
-                Eng Ko'p Tanlangan
+                {t("pricing_most_popular")}
               </div>
             )}
 
@@ -167,7 +169,7 @@ export default function PricingHub() {
               </div>
 
               <div className="pt-4 border-t border-white/[0.06] space-y-2.5">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Imkoniyatlar:</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{t("pricing_features_label")}</p>
                 {plan.features.map((feat, idx) => (
                   <div key={idx} className="flex items-start space-x-2 text-xs text-slate-300">
                     <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
@@ -200,8 +202,8 @@ export default function PricingHub() {
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="font-bold text-base text-white">MCHJ yoki YaTT bo'lishim shartmi?</h4>
-            <p className="text-xs text-slate-400">To'lovlar va daromad qabul qilish bo'yicha muhim ma'lumot</p>
+            <h4 className="font-bold text-base text-white">{t("faq_title")}</h4>
+            <p className="text-xs text-slate-400">{t("faq_desc")}</p>
           </div>
         </div>
 
@@ -209,34 +211,35 @@ export default function PricingHub() {
           <div className="p-4 rounded-2xl bg-[#07080D] border border-white/[0.05] space-y-1.5">
             <div className="text-xs font-bold text-blue-400 flex items-center gap-1.5">
               <CreditCard className="w-4 h-4" />
-              <span>1. P2P Karta / Click Up</span>
+              <span>{t("faq_card_1_title")}</span>
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              Mijozlar to'g'ridan-to'g'ri karta raqamingizga yoki Click / Payme / Uzum havolasi orqali to'lov qila oladi. MCHJ shart emas!
+              {t("faq_card_1_desc")}
             </p>
           </div>
 
           <div className="p-4 rounded-2xl bg-[#07080D] border border-white/[0.05] space-y-1.5">
             <div className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
               <Star className="w-4 h-4" />
-              <span>2. Telegram Stars</span>
+              <span>{t("faq_card_2_title")}</span>
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              Telegram bot ichida rasmiy "Stars" orqali to'lov qabul qilib, uni to'g'ridan-to'g'ri TON/kriptoga naqdlashtirish mumkin.
+              {t("faq_card_2_desc")}
             </p>
           </div>
 
           <div className="p-4 rounded-2xl bg-[#07080D] border border-white/[0.05] space-y-1.5">
             <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4" />
-              <span>3. O'zini o'zi band qilish</span>
+              <span>{t("faq_card_3_title")}</span>
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              Soliq ilovasida 2 daqiqada tekin ro'yxatdan o'tib, Click Merchant va Payme Business shartnomasini 0% soliq bilan olish mumkin!
+              {t("faq_card_3_desc")}
             </p>
           </div>
         </div>
       </div>
+
 
       {/* Payment Modal */}
       {showConfirmModal && selectedPlan && (

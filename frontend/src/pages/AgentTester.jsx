@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
 import { api } from "../services/api";
+import { useLanguage } from "../i18n/LanguageContext";
 import { 
   Bot, Send, User, Sparkles, CheckCircle, Mic, MicOff, 
   Volume2, VolumeX, Play, Square, Headphones, RefreshCw 
 } from "lucide-react";
 
 export default function AgentTester({ agents }) {
+  const { t, lang } = useLanguage();
   const [selectedAgentId, setSelectedAgentId] = useState(agents?.[0]?.id || null);
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
   const [recording, setRecording] = useState(false);
-  const [selectedVoice, setSelectedVoice] = useState("uz-UZ-MadinaNeural");
+  const [selectedVoice, setSelectedVoice] = useState("auto");
   const [playingMsgIndex, setPlayingMsgIndex] = useState(null);
   const [loadingTTS, setLoadingTTS] = useState(null);
 
@@ -31,11 +33,12 @@ export default function AgentTester({ agents }) {
       setMessages([
         {
           sender: "ai",
-          text: curAgent?.welcome_message || "Assalomu alaykum! Sizga qanday yordam bera olaman?"
+          text: curAgent?.welcome_message || (lang === 'ru' ? "Здравствуйте! Чем я могу вам помочь?" : (lang === 'en' ? "Hello! How can I assist you today?" : "Assalomu alaykum! Sizga qanday yordam bera olaman?"))
         }
       ]);
     }
-  }, [selectedAgentId]);
+  }, [selectedAgentId, lang]);
+
 
   const playTTS = async (text, idx) => {
     if (playingMsgIndex === idx && currentAudioRef.current) {
@@ -166,7 +169,7 @@ export default function AgentTester({ agents }) {
       <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0a0c13]/90 backdrop-blur-xl border border-white/[0.08] p-3.5 rounded-2xl shadow-xl">
         <div className="flex items-center gap-2">
           <Bot className="w-5 h-5 text-purple-400" />
-          <span className="text-xs font-bold uppercase tracking-wider text-white/60">Agent:</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-white/60">{t("select_agent")}</span>
           <select
             value={selectedAgentId || ""}
             onChange={(e) => setSelectedAgentId(e.target.value)}
@@ -181,15 +184,20 @@ export default function AgentTester({ agents }) {
         {/* Voice Selector */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-white/50 flex items-center gap-1">
-            <Volume2 className="w-3.5 h-3.5 text-emerald-400" /> Ovoz:
+            <Volume2 className="w-3.5 h-3.5 text-emerald-400" /> {t("select_voice")}
           </span>
           <select
             value={selectedVoice}
             onChange={(e) => setSelectedVoice(e.target.value)}
             className="bg-[#12141d] border border-white/[0.08] text-xs text-white rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-500/50"
           >
-            <option value="uz-UZ-MadinaNeural">👩 Madina (Ayol)</option>
-            <option value="uz-UZ-SardorNeural">👨 Sardor (Erkak)</option>
+            <option value="auto">{t("voice_auto")}</option>
+            <option value="uz-UZ-MadinaNeural">{t("voice_uz_female")}</option>
+            <option value="uz-UZ-SardorNeural">{t("voice_uz_male")}</option>
+            <option value="ru-RU-SvetlanaNeural">{t("voice_ru_female")}</option>
+            <option value="ru-RU-DmitryNeural">{t("voice_ru_male")}</option>
+            <option value="en-US-JennyNeural">{t("voice_en_female")}</option>
+            <option value="en-US-GuyNeural">{t("voice_en_male")}</option>
           </select>
         </div>
       </div>
@@ -220,7 +228,7 @@ export default function AgentTester({ agents }) {
                         ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 animate-pulse"
                         : "bg-white/[0.05] hover:bg-white/[0.1] text-white/60 hover:text-white border-white/[0.08]"
                     }`}
-                    title={playingMsgIndex === idx ? "To'xtatish" : "Ovozli tinglash"}
+                    title={playingMsgIndex === idx ? t("close") : t("btn_test")}
                   >
                     {loadingTTS === idx ? (
                       <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-400" />
@@ -239,10 +247,10 @@ export default function AgentTester({ agents }) {
               <div className="mt-2 max-w-[85%] sm:max-w-[75%] rounded-2xl bg-emerald-950/40 border border-emerald-500/30 p-3 space-y-1 text-xs text-emerald-300 shadow-xl shadow-emerald-950/20 animate-fade-in">
                 <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[10px] text-emerald-400">
                   <CheckCircle className="w-3.5 h-3.5" />
-                  <span>CRM ga Yangi Lid Saqlandi!</span>
+                  <span>{t("crm_lead_captured")}</span>
                 </div>
                 <div className="text-white/90 font-medium">
-                  <span>{msg.lead_data.customer_name || "Mijoz"}</span> • 
+                  <span>{msg.lead_data.customer_name || (lang === 'ru' ? "Клиент" : "Customer")}</span> • 
                   <span className="font-mono text-emerald-300 ml-1">{msg.lead_data.customer_phone}</span>
                 </div>
                 {msg.lead_data.summary && (
@@ -258,7 +266,7 @@ export default function AgentTester({ agents }) {
             <div className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" />
             <div className="w-2 h-2 rounded-full bg-purple-400 animate-bounce delay-100" />
             <div className="w-2 h-2 rounded-full bg-purple-400 animate-bounce delay-200" />
-            <span className="text-xs font-medium ml-1">Gemini AI o'ylamoqda...</span>
+            <span className="text-xs font-medium ml-1">{t("ai_thinking")}</span>
           </div>
         )}
       </div>
@@ -269,7 +277,7 @@ export default function AgentTester({ agents }) {
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder={recording ? "🎙️ Ovoz yozilmoqda, to'xtatish uchun qizil tugmani bosing..." : "Matn yozing yoki mikrofon orqali gapiring..."}
+          placeholder={recording ? t("recording_active") : t("test_input_placeholder")}
           disabled={recording}
           className="flex-1 bg-transparent px-3 py-2 text-xs sm:text-sm text-white placeholder:text-white/30 focus:outline-none"
         />
@@ -297,7 +305,7 @@ export default function AgentTester({ agents }) {
         <button
           type="submit"
           disabled={!inputText.trim() || loading || recording}
-          className="p-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg shadow-purple-500/20 active:scale-95 disabled:opacity-40 transition"
+          className="p-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg shadow-purple-500/20 active:scale-95 disabled:opacity-40 transition cursor-pointer"
         >
           <Send className="w-4 h-4" />
         </button>

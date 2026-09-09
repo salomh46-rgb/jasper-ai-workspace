@@ -4,8 +4,10 @@ import {
   ExternalLink, Copy, Check, DollarSign, Receipt, Send, Filter, RefreshCw, Smartphone
 } from "lucide-react";
 import { api } from "../services/api";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function PaymentsHub() {
+  const { t } = useLanguage();
   const [stats, setStats] = useState({ total_revenue: 0, pending_amount: 0, total_invoices: 0, paid_invoices: 0 });
   const [invoices, setInvoices] = useState([]);
   const [agents, setAgents] = useState([]);
@@ -103,13 +105,13 @@ export default function PaymentsHub() {
         <div>
           <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-2">
             <CreditCard className="w-3.5 h-3.5" />
-            <span>To‘lov & Kassa Integratsiyasi</span>
+            <span>{t("pay_badge")}</span>
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-            Click, Payme & Uzum To‘lovlari
+            {t("pay_title")}
           </h1>
           <p className="text-xs text-white/50 mt-1">
-            Mijozlarga avtomatik to‘lov havolalari yaratish, kassa hisob-kitobi va to‘lov monitoringi
+            {t("pay_subtitle")}
           </p>
         </div>
 
@@ -117,7 +119,7 @@ export default function PaymentsHub() {
           <button
             onClick={loadData}
             className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.06] transition text-white/70 hover:text-white"
-            title="Yangilash"
+            title={t("refresh")}
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -129,7 +131,7 @@ export default function PaymentsHub() {
             className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            <span>Yangi Invoice Yaratish</span>
+            <span>{t("pay_btn_new_invoice")}</span>
           </button>
         </div>
       </div>
@@ -139,7 +141,7 @@ export default function PaymentsHub() {
         <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all pointer-events-none" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-white/50">Jami Tushum (To‘langan)</span>
+            <span className="text-xs font-medium text-white/50">{t("pay_stat_total_revenue")}</span>
             <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
               <CheckCircle2 className="w-4 h-4" />
             </div>
@@ -148,14 +150,14 @@ export default function PaymentsHub() {
             {(stats.total_revenue || 0).toLocaleString()} <span className="text-xs font-normal text-emerald-400">UZS</span>
           </div>
           <div className="text-[10px] text-white/40 mt-1">
-            {stats.paid_invoices || 0} ta muvaffaqiyatli to‘lov
+            {stats.paid_invoices || 0}
           </div>
         </div>
 
         <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all pointer-events-none" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-white/50">Kutilayotgan Summa</span>
+            <span className="text-xs font-medium text-white/50">{t("pay_stat_pending")}</span>
             <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
               <Clock className="w-4 h-4" />
             </div>
@@ -164,28 +166,28 @@ export default function PaymentsHub() {
             {(stats.pending_amount || 0).toLocaleString()} <span className="text-xs font-normal text-amber-400">UZS</span>
           </div>
           <div className="text-[10px] text-white/40 mt-1">
-            {(stats.total_invoices || 0) - (stats.paid_invoices || 0)} ta kutish holatida
+            {(stats.total_invoices || 0) - (stats.paid_invoices || 0)}
           </div>
         </div>
 
         <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md relative overflow-hidden group">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-white/50">Jami Hisob-fakturalar</span>
+            <span className="text-xs font-medium text-white/50">{t("pay_stat_total_invoices")}</span>
             <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
               <Receipt className="w-4 h-4" />
             </div>
           </div>
           <div className="text-xl font-black text-white mt-2 tracking-tight">
-            {stats.total_invoices || 0} <span className="text-xs font-normal text-white/50">dona</span>
+            {stats.total_invoices || 0}
           </div>
           <div className="text-[10px] text-white/40 mt-1">
-            Click, Payme va Uzum orqali
+            Click, Payme, Uzum
           </div>
         </div>
 
         <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md relative overflow-hidden group">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-white/50">Konversiya / Samaradorlik</span>
+            <span className="text-xs font-medium text-white/50">{t("pay_stat_conversion")}</span>
             <div className="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
               <DollarSign className="w-4 h-4" />
             </div>
@@ -194,7 +196,7 @@ export default function PaymentsHub() {
             {stats.total_invoices > 0 ? Math.round((stats.paid_invoices / stats.total_invoices) * 100) : 0}%
           </div>
           <div className="text-[10px] text-white/40 mt-1">
-            Mijoz to‘lov nisbati
+            {t("status")}
           </div>
         </div>
       </div>
@@ -212,7 +214,7 @@ export default function PaymentsHub() {
                   : "bg-white/[0.03] text-white/50 hover:text-white/80 border border-white/[0.04]"
               }`}
             >
-              {st === "all" ? "Barchasi" : st === "paid" ? "✅ To‘langan" : st === "pending" ? "⏳ Kutilmoqda" : "❌ Bekor qilingan"}
+              {st === "all" ? t("pay_filter_all") : st === "paid" ? t("pay_filter_paid") : st === "pending" ? t("pay_filter_pending") : t("pay_filter_cancelled")}
             </button>
           ))}
         </div>

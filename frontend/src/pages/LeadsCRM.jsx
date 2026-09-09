@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../services/api";
+import { useLanguage } from "../i18n/LanguageContext";
 import { 
   Users, Phone, Sparkles, Download, Sheet, ExternalLink, 
   CheckCircle2, Clock, X, RefreshCw, Layers 
 } from "lucide-react";
 
 export default function LeadsCRM() {
+  const { t, lang } = useLanguage();
   const [leads, setLeads] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [downloading, setDownloading] = useState(false);
@@ -69,21 +71,21 @@ export default function LeadsCRM() {
         return (
           <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Yangi</span>
+            <span>{t("filter_new")}</span>
           </span>
         );
       case "in_progress":
         return (
           <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/25">
             <Clock className="w-3 h-3 text-amber-400" />
-            <span>Jarayonda</span>
+            <span>{t("filter_progress")}</span>
           </span>
         );
       case "completed":
         return (
           <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-500/15 text-blue-400 border border-blue-500/25">
             <CheckCircle2 className="w-3 h-3 text-blue-400" />
-            <span>Bajarildi</span>
+            <span>{t("filter_completed")}</span>
           </span>
         );
       default:
@@ -98,9 +100,9 @@ export default function LeadsCRM() {
         <div>
           <h2 className="text-base sm:text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
             <Users className="w-5 h-5 text-emerald-400" />
-            <span>Lidlar & Buyurtmalar CRM</span>
+            <span>{t("crm_title")}</span>
           </h2>
-          <p className="text-xs text-slate-400">AI bot toʻplagan barcha mijozlar va buyurtmalar</p>
+          <p className="text-xs text-slate-400">{t("crm_subtitle")}</p>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -108,20 +110,20 @@ export default function LeadsCRM() {
             type="button"
             onClick={handleExportExcel}
             disabled={downloading}
-            className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 border border-white/[0.08] text-slate-200 text-xs font-semibold shadow-sm transition-all"
+            className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 border border-white/[0.08] text-slate-200 text-xs font-semibold shadow-sm transition-all cursor-pointer"
             title="Excel formatida yuklab olish"
           >
             <Download className="w-3.5 h-3.5 text-emerald-400" />
-            <span>{downloading ? "Yuklanmoqda..." : "Excel (.xlsx)"}</span>
+            <span>{downloading ? t("btn_saving") : t("btn_export_excel")}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setShowSheetsModal(true)}
-            className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 active:scale-95 border border-emerald-500/25 text-emerald-400 text-xs font-semibold shadow-sm transition-all"
+            className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 active:scale-95 border border-emerald-500/25 text-emerald-400 text-xs font-semibold shadow-sm transition-all cursor-pointer"
           >
             <Sheet className="w-3.5 h-3.5" />
-            <span>Google Sheets</span>
+            <span>{t("btn_sync_sheets")}</span>
           </button>
         </div>
       </div>
@@ -129,10 +131,10 @@ export default function LeadsCRM() {
       {/* Filter Tabs */}
       <div className="flex items-center space-x-2 overflow-x-auto pb-1">
         {[
-          { id: "all", label: "Barchasi" },
-          { id: "new", label: "Yangi Lidlar" },
-          { id: "in_progress", label: "Bogʻlanilgan" },
-          { id: "completed", label: "Muvaffaqiyatli" },
+          { id: "all", label: t("filter_all") },
+          { id: "new", label: t("filter_new") },
+          { id: "in_progress", label: t("filter_progress") },
+          { id: "completed", label: t("filter_completed") },
         ].map(tab => (
           <button
             key={tab.id}
@@ -160,12 +162,12 @@ export default function LeadsCRM() {
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center space-x-2">
-                    <h3 className="font-bold text-sm text-white">{lead.customer_name || "Mijoz"}</h3>
+                    <h3 className="font-bold text-sm text-white">{lead.customer_name || (lang === 'ru' ? "Клиент" : "Customer")}</h3>
                     {getStatusBadge(lead.status)}
                   </div>
                   <div className="flex items-center space-x-2 text-xs font-mono text-slate-300 mt-1">
                     <Phone className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>{lead.customer_phone || "Raqam yoʻq"}</span>
+                    <span>{lead.customer_phone || (lang === 'ru' ? "Нет номера" : "No phone")}</span>
                   </div>
                 </div>
 
@@ -184,14 +186,14 @@ export default function LeadsCRM() {
 
               {lead.summary && (
                 <div className="p-3 rounded-xl bg-[#07080D] border border-white/[0.05] text-xs text-slate-300 leading-relaxed">
-                  <span className="text-slate-500 font-medium">AI Xulosa: </span>
+                  <span className="text-slate-500 font-medium">AI {t("summary")}: </span>
                   {lead.summary}
                 </div>
               )}
 
               <div className="pt-2 border-t border-white/[0.05] flex items-center justify-between text-xs">
                 <span className="text-[11px] text-slate-500 font-mono">
-                  {new Date(lead.created_at).toLocaleString("uz-UZ", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })}
+                  {new Date(lead.created_at).toLocaleString(lang === 'ru' ? "ru-RU" : (lang === 'en' ? "en-US" : "uz-UZ"), { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })}
                 </span>
 
                 <div className="flex items-center space-x-1.5">
@@ -200,10 +202,10 @@ export default function LeadsCRM() {
                     onChange={(e) => handleStatusChange(lead.id, e.target.value)}
                     className="bg-[#07080D] border border-white/[0.08] text-xs text-slate-300 rounded-lg px-2 py-1 outline-none font-medium"
                   >
-                    <option value="new">Yangi</option>
-                    <option value="in_progress">Jarayonda</option>
-                    <option value="completed">Bajarildi</option>
-                    <option value="canceled">Bekor</option>
+                    <option value="new">{t("filter_new")}</option>
+                    <option value="in_progress">{t("filter_progress")}</option>
+                    <option value="completed">{t("filter_completed")}</option>
+                    <option value="canceled">{t("cancel")}</option>
                   </select>
                 </div>
               </div>
@@ -213,10 +215,10 @@ export default function LeadsCRM() {
       ) : (
         <div className="rounded-2xl bg-[#0E121B]/70 border border-dashed border-white/[0.1] p-8 text-center space-y-2">
           <Users className="w-10 h-10 text-slate-400 mx-auto opacity-50" />
-          <p className="text-sm font-semibold text-slate-200">Ushbu holatda lidlar topilmadi</p>
-          <p className="text-xs text-slate-400">Mijozlar Telegram botingizga yozishganda, ularning kontaktlari bu yerda aks etadi.</p>
+          <p className="text-sm font-semibold text-slate-200">{t("no_leads_text")}</p>
         </div>
       )}
+
 
       {/* Google Sheets Modal */}
       {showSheetsModal && (
