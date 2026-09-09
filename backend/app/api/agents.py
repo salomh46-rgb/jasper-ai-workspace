@@ -54,7 +54,7 @@ TEMPLATES = {
 class AgentCreateRequest(BaseModel):
     name: str
     category: str = "clinic"
-    bot_token: str
+    bot_token: Optional[str] = ""
     company_name: Optional[str] = None
     phone_number: Optional[str] = None
     address: Optional[str] = None
@@ -64,6 +64,7 @@ class AgentCreateRequest(BaseModel):
 
 class AgentUpdateRequest(BaseModel):
     name: Optional[str] = None
+    bot_token: Optional[str] = None
     company_name: Optional[str] = None
     phone_number: Optional[str] = None
     address: Optional[str] = None
@@ -92,12 +93,14 @@ async def list_agents(db: AsyncSession = Depends(get_db), current_user: User = D
     
     result = []
     for a in agents:
+        tok = a.bot_token or ""
         result.append({
             "id": a.id,
             "name": a.name,
             "category": a.category,
             "company_name": a.company_name,
-            "bot_token_masked": a.bot_token[:6] + "..." + a.bot_token[-4:] if len(a.bot_token) > 10 else "***",
+            "bot_token": tok,
+            "bot_token_masked": tok[:6] + "..." + tok[-4:] if len(tok) > 10 else (tok or "Mavjud emas"),
             "bot_username": a.bot_username,
             "voice_enabled": a.voice_enabled,
             "human_takeover_enabled": a.human_takeover_enabled,
@@ -120,7 +123,7 @@ async def create_agent(payload: AgentCreateRequest, db: AsyncSession = Depends(g
         user_id=current_user.id,
         name=payload.name,
         category=payload.category,
-        bot_token=payload.bot_token.strip(),
+        bot_token=(payload.bot_token or "").strip(),
         company_name=payload.company_name,
         phone_number=payload.phone_number,
         address=payload.address,
@@ -143,7 +146,7 @@ async def create_agent(payload: AgentCreateRequest, db: AsyncSession = Depends(g
 
     await db.commit()
     await db.refresh(agent)
-    return {"status": "success", "agent_id": agent.id, "message": "Agent muvaffaqiyatli yaratildi!"}
+    return {"status": "success", "id": agent.id, "agent_id": agent.id, "message": "Agent muvaffaqiyatli yaratildi!"}
 
 @router.get("/{agent_id}")
 async def get_agent(agent_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -169,7 +172,7 @@ async def update_agent(agent_id: int, payload: AgentUpdateRequest, db: AsyncSess
 
     await db.commit()
     await db.refresh(agent)
-    return {"status": "success", "message": "Agent muvaffaqiyatli yangilandi!"}
+    return {"status": "success", "id": agent.id, "agent_id": agent.id, "message": "Agent muvaffaqiyatli yangilandi!"}
 
 @router.post("/{agent_id}/test")
 async def test_agent(agent_id: int, payload: TestAgentRequest, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):

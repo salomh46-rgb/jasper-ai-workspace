@@ -29,8 +29,20 @@ class ApiService {
       });
 
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || `Server xatoligi: ${response.status}`);
+        let errMessage = `Server xatoligi: ${response.status}`;
+        try {
+          const errData = await response.json();
+          if (typeof errData.detail === 'string') {
+            errMessage = errData.detail;
+          } else if (Array.isArray(errData.detail) && errData.detail.length > 0) {
+            errMessage = errData.detail.map(d => d.msg || JSON.stringify(d)).join(', ');
+          } else if (errData.detail) {
+            errMessage = JSON.stringify(errData.detail);
+          } else if (errData.message) {
+            errMessage = errData.message;
+          }
+        } catch (e) {}
+        throw new Error(errMessage);
       }
 
       return await response.json();

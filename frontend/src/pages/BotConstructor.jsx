@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
 import { 
   Save, ArrowLeft, Sparkles, Building2, ShoppingBag, 
-  GraduationCap, Wrench, Key, BookOpen, Check, HelpCircle 
+  GraduationCap, Wrench, Key, BookOpen, Check 
 } from "lucide-react";
 
 export default function BotConstructor() {
@@ -31,8 +31,8 @@ export default function BotConstructor() {
 
   const categories = [
     { id: "clinic", label: "Klinika", icon: Building2 },
-    { id: "shop", label: "Do\'kon", icon: ShoppingBag },
-    { id: "education", label: "O\'quv Markaz", icon: GraduationCap },
+    { id: "shop", label: "Do‘kon", icon: ShoppingBag },
+    { id: "education", label: "O‘quv Markaz", icon: GraduationCap },
     { id: "craftsman", label: "Servis", icon: Wrench },
   ];
 
@@ -102,18 +102,24 @@ export default function BotConstructor() {
     e.preventDefault();
     try {
       setSaving(true);
-      let res;
+      let targetAgentId = id;
       if (id && id !== "new") {
-        res = await api.updateAgent(id, formData);
+        const res = await api.updateAgent(id, formData);
+        targetAgentId = res.id || res.agent_id || id;
       } else {
-        res = await api.createAgent(formData);
+        const res = await api.createAgent(formData);
+        targetAgentId = res.id || res.agent_id;
       }
       setSavedSuccess(true);
       setTimeout(() => {
-        navigate("/agents/" + res.id + "/knowledge");
-      }, 800);
+        if (targetAgentId) {
+          navigate(`/agents/${targetAgentId}/knowledge`);
+        } else {
+          navigate("/agents");
+        }
+      }, 700);
     } catch (err) {
-      alert(err.message || "Saqlashda xatolik");
+      alert(err.message || "Saqlashda xatolik yuz berdi");
     } finally {
       setSaving(false);
     }
@@ -133,6 +139,7 @@ export default function BotConstructor() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <button 
+            type="button"
             onClick={() => navigate(-1)}
             className="p-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 border border-white/[0.08] text-slate-300 transition-all"
           >
@@ -151,7 +158,7 @@ export default function BotConstructor() {
         {id && id !== "new" && (
           <button
             type="button"
-            onClick={() => navigate("/agents/" + id + "/knowledge")}
+            onClick={() => navigate(`/agents/${id}/knowledge`)}
             className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 text-xs font-semibold transition-all active:scale-95"
           >
             <BookOpen className="w-3.5 h-3.5" />
@@ -164,7 +171,7 @@ export default function BotConstructor() {
         {/* Category Segmented Control */}
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
-            Soha / Biznes Yo\'nalishi
+            Soha / Biznes Yoʻnalishi
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {categories.map((cat) => {
@@ -194,7 +201,7 @@ export default function BotConstructor() {
         <div className="rounded-2xl bg-[#0E121B]/90 backdrop-blur-xl border border-white/[0.07] p-4 sm:p-5 space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
           <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Asosiy Ma\'lumotlar</span>
+            <span>Asosiy Maʻlumotlar</span>
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -285,7 +292,7 @@ export default function BotConstructor() {
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>AI Xarakteri & Ko\'rsatmalar</span>
+              <span>AI Xarakteri & Koʻrsatmalar</span>
             </h3>
           </div>
 
@@ -301,7 +308,7 @@ export default function BotConstructor() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-300">Tizim Ko\'rsatmasi (System Prompt)</label>
+            <label className="text-xs font-medium text-slate-300">Tizim Koʻrsatmasi (System Prompt)</label>
             <textarea
               rows={4}
               value={formData.system_prompt}

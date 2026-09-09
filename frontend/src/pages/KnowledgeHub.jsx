@@ -10,6 +10,7 @@ export default function KnowledgeHub() {
   const { agentId } = useParams();
   const navigate = useNavigate();
   
+  const [agent, setAgent] = useState(null);
   const [knowledge, setKnowledge] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,13 +29,19 @@ export default function KnowledgeHub() {
   ];
 
   useEffect(() => {
-    if (agentId) loadKnowledge();
+    if (agentId && agentId !== "undefined") {
+      loadData();
+    }
   }, [agentId]);
 
-  const loadKnowledge = async () => {
+  const loadData = async () => {
     try {
-      const data = await api.getKnowledge(agentId);
-      setKnowledge(data);
+      const [agentData, knowledgeData] = await Promise.all([
+        api.getAgent(agentId).catch(() => null),
+        api.getKnowledge(agentId).catch(() => [])
+      ]);
+      setAgent(agentData);
+      setKnowledge(knowledgeData || []);
     } catch (err) {
       console.error(err);
     }
@@ -42,13 +49,23 @@ export default function KnowledgeHub() {
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    if (!newItem.title || !newItem.content) return;
+    if (!newItem.title.trim() || !newItem.content.trim()) return;
+    if (!agentId || agentId === "undefined") {
+      alert("Agent ID topilmadi. Iltimos, avval agentni tanlang yoki yarating.");
+      return;
+    }
+
     try {
       setSaving(true);
-      await api.addKnowledge({ agent_id: Number(agentId), ...newItem });
+      await api.addKnowledge({ 
+        agent_id: Number(agentId), 
+        title: newItem.title.trim(),
+        content: newItem.content.trim(),
+        category: newItem.category
+      });
       setShowAddModal(false);
       setNewItem({ title: "", content: "", category: "service" });
-      loadKnowledge();
+      loadData();
     } catch (err) {
       alert(err.message || "Xatolik yuz berdi");
     } finally {
@@ -57,12 +74,12 @@ export default function KnowledgeHub() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Ushbu ma\'lumotni o\'chirmoqchimisiz?")) return;
+    if (!confirm("Ushbu maʻlumotni oʻchirmoqchimisiz?")) return;
     try {
       await api.deleteKnowledge(id);
-      loadKnowledge();
+      loadData();
     } catch (err) {
-      alert(err.message || "Xatolik");
+      alert(err.message || "Xatolik yuz berdi");
     }
   };
 
@@ -77,7 +94,8 @@ export default function KnowledgeHub() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <button 
-            onClick={() => navigate(-1)} 
+            type="button"
+            onClick={() => navigate("/agents")} 
             className="p-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 border border-white/[0.08] text-slate-300 transition-all"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -87,11 +105,14 @@ export default function KnowledgeHub() {
               <BookOpen className="w-5 h-5 text-blue-400" />
               <span>Bilimlar Bazasi (RAG)</span>
             </h2>
-            <p className="text-xs text-slate-400">AI faqat shu kiritilgan ma\'lumotlar asosida mijozlarga javob beradi</p>
+            <p className="text-xs text-slate-400">
+              {agent ? `${agent.name} uchun bilimlar` : "AI faqat shu maʻlumotlarga tayanib javob beradi"}
+            </p>
           </div>
         </div>
 
         <button
+          type="button"
           onClick={() => setShowAddModal(true)}
           className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-600/30 active:scale-95 transition-all"
         >
@@ -138,9 +159,10 @@ export default function KnowledgeHub() {
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => handleDelete(item.id)}
                   className="p-2 rounded-lg bg-white/[0.02] hover:bg-rose-500/15 text-slate-400 hover:text-rose-400 border border-transparent hover:border-rose-500/30 transition-all active:scale-90"
-                  title="O\'chirish"
+                  title="Oʻchirish"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -154,10 +176,11 @@ export default function KnowledgeHub() {
           <div>
             <p className="text-sm font-semibold text-slate-200">Hali hech qanday bilim kiritilmagan</p>
             <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-              Xizmatlar narxlari, manzillar va aksiyalar haqida ma\'lumot qo\'shing. AI ularni o\'rganib oladi.
+              Xizmatlar narxlari, manzillar va aksiyalar haqida maʻlumot qoʻshing. AI ularni oʻrganib oladi.
             </p>
           </div>
           <button
+            type="button"
             onClick={() => setShowAddModal(true)}
             className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md active:scale-95"
           >
@@ -174,9 +197,10 @@ export default function KnowledgeHub() {
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <h3 className="font-bold text-base text-white flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-blue-400" />
-                <span>Yangi Bilim Qo\'shish</span>
+                <span>Yangi Bilim Qoʻshish</span>
               </h3>
               <button 
+                type="button"
                 onClick={() => setShowAddModal(false)}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-white"
               >
@@ -205,19 +229,19 @@ export default function KnowledgeHub() {
                   required
                   value={newItem.title}
                   onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
-                  placeholder="Masalan: Tish tozalash va oqartirish narxlari"
+                  placeholder="Masalan: Aksiya va chegirmalar tartibi"
                   className="w-full bg-[#07080D] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white outline-none"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-slate-300">Batafsil Ma\'lumot</label>
+                <label className="text-xs font-medium text-slate-300">Batafsil Maʻlumot</label>
                 <textarea
                   rows={5}
                   required
                   value={newItem.content}
                   onChange={(e) => setNewItem({ ...newItem, content: e.target.value })}
-                  placeholder="Tish tozalash (Airflow) - 150 000 so'm. Oqartirish (Zoom 4) - 1 200 000 so'm..."
+                  placeholder="Do'stingizni chaqiring va 3 kun foizsiz xizmatdan foydalaning..."
                   className="w-full bg-[#07080D] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white outline-none leading-relaxed"
                 />
               </div>
@@ -235,7 +259,7 @@ export default function KnowledgeHub() {
                   disabled={saving}
                   className="px-5 py-2.5 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 text-white text-xs font-semibold shadow-md active:scale-95 disabled:opacity-50"
                 >
-                  {saving ? "Qo'shilmoqda..." : "Saqlash"}
+                  {saving ? "Qoʻshilmoqda..." : "Saqlash"}
                 </button>
               </div>
             </form>
