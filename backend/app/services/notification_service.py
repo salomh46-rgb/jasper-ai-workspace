@@ -137,3 +137,39 @@ class NotificationService:
             logger.warning(f"To'lov xabarnomasini yuborishda xatolik: {e}")
         finally:
             await bot.session.close()
+
+    @classmethod
+    async def notify_admin_subscription_request(
+        cls,
+        plan_name: str,
+        price: str,
+        sender_name: str,
+        sender_phone: str,
+        payment_method: str = "card"
+    ):
+        admin_id = settings.ADMIN_TELEGRAM_ID
+        if not admin_id:
+            return
+
+        bot = cls._get_bot()
+        if not bot:
+            return
+
+        try:
+            method_label = "💳 Visa / Karta (P2P)" if payment_method == "card" else "⭐ Telegram Stars"
+            msg_text = (
+                "💎 <b>YANGI SAAS OBUNA SO'ROVI QABUL QILINDI!</b>\n\n"
+                f"🚀 <b>Tarif:</b> {plan_name} ({price} so'm / oy)\n"
+                f"👤 <b>Mijoz:</b> {sender_name}\n"
+                f"📞 <b>Telefon:</b> <code>{sender_phone}</code>\n"
+                f"💵 <b>To'lov usuli:</b> {method_label}\n"
+                f"⏳ <b>Holat:</b> To'lov tekshiruvi kutilmoqda\n\n"
+                f"<i>Karta hisobingizni tekshirib, mijoz bilan bog'laning: {sender_phone}</i>"
+            )
+
+            await bot.send_message(chat_id=admin_id, text=msg_text, parse_mode="HTML")
+            logger.info(f"✅ Adminga ({admin_id}) yangi obuna so'rovi xabarnomasi yuborildi!")
+        except Exception as e:
+            logger.warning(f"Adminga obuna xabarnomasini yuborishda xatolik: {e}")
+        finally:
+            await bot.session.close()

@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { 
   Check, Zap, Sparkles, Crown, ShieldCheck, ArrowRight, 
-  CreditCard, Smartphone, Send, Copy, HelpCircle, Star, Globe, MessageSquare, Headphones
+  CreditCard, Smartphone, Send, Copy, HelpCircle, Star, Globe, MessageSquare, Headphones, Lock
 } from "lucide-react";
+import { api } from "../services/api";
 
 export default function PricingHub() {
   const [selectedPlan, setSelectedPlan] = useState(null);
@@ -12,9 +13,11 @@ export default function PricingHub() {
   const [senderName, setSenderName] = useState("");
   const [senderPhone, setSenderPhone] = useState("+998 ");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const cardNumber = "8600 0000 0000 0000"; // Foydalanuvchi o'z kartasini kiritishi mumkin
-  const cardHolder = "Javohirbek Asqarov (Jasper AI)";
+  const cardNumber = "4916 9903 0500 7954";
+  const cardHolder = "Javohirbek Asqarov (Visa)";
+  const adminUsername = "Dr_eviluz";
 
   const plans = [
     {
@@ -94,9 +97,23 @@ export default function PricingHub() {
     setTimeout(() => setCopiedCard(false), 2000);
   };
 
-  const handleConfirmPayment = (e) => {
+  const handleConfirmPayment = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    try {
+      setSubmitting(true);
+      await api.sendSubscribeRequest({
+        plan_name: selectedPlan.name,
+        price: selectedPlan.price,
+        sender_name: senderName,
+        sender_phone: senderPhone,
+        payment_method: paymentMethod
+      });
+      setSubmitted(true);
+    } catch (err) {
+      alert("Xatolik yuz berdi: " + (err.message || "Iltimos qayta urinib ko'ring"));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -326,9 +343,17 @@ export default function PricingHub() {
 
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/30 active:scale-95 transition-all"
+                  disabled={submitting}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 disabled:opacity-50 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/30 active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
-                  To'lovni Tasdiqlash & Faollashtirish
+                  {submitting ? (
+                    <span>So'rov yuborilmoqda...</span>
+                  ) : (
+                    <>
+                      <span>To'lovni Tasdiqlash & Faollashtirish</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
                 </button>
               </form>
             ) : (
@@ -339,15 +364,28 @@ export default function PricingHub() {
                 <div>
                   <h4 className="font-bold text-lg text-white">So'rovingiz Qabul Qilindi!</h4>
                   <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                    To'lovingiz tasdiqlangach, {selectedPlan.name} tarifingiz 5 daqiqa ichida faollashtiriladi!
+                    To'lovingiz haqida adminga xabar yuborildi. {selectedPlan.name} tarifingiz 5 daqiqa ichida faollashtiriladi!
                   </p>
                 </div>
-                <button
-                  onClick={() => setShowConfirmModal(false)}
-                  className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition-all"
-                >
-                  Yopish
-                </button>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-2">
+                  <a
+                    href={`https://t.me/${adminUsername}?text=${encodeURIComponent("Salom! Men Jasper AI Workspace da " + selectedPlan.name + " tarifiga to'lov qildim. Telefon: " + senderPhone)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-blue-500/30"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Telegramda Chekni Yuborish (@{adminUsername})</span>
+                  </a>
+
+                  <button
+                    onClick={() => setShowConfirmModal(false)}
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition-all"
+                  >
+                    Yopish
+                  </button>
+                </div>
               </div>
             )}
           </div>

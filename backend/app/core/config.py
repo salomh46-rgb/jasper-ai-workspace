@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     # Master Bot for Telegram Mini App and Alerts
     MASTER_BOT_TOKEN: Optional[str] = None
     WEBHOOK_BASE_URL: Optional[str] = None
+    ADMIN_TELEGRAM_ID: int = 1320855100
+    ADMIN_TELEGRAM_USERNAME: str = "@Dr_eviluz"
     
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

@@ -201,3 +201,22 @@ async def update_invoice_status(
         )
 
     return {"status": "success", "invoice_id": inv.id, "new_status": inv.status}
+
+class SubscribeRequestPayload(BaseModel):
+    plan_name: str
+    price: str
+    sender_name: str
+    sender_phone: str
+    payment_method: str = "card"
+
+@router.post("/subscribe-request")
+async def handle_subscription_request(payload: SubscribeRequestPayload):
+    from app.services.notification_service import NotificationService
+    await NotificationService.notify_admin_subscription_request(
+        plan_name=payload.plan_name,
+        price=payload.price,
+        sender_name=payload.sender_name,
+        sender_phone=payload.sender_phone,
+        payment_method=payload.payment_method
+    )
+    return {"status": "success", "message": "Obuna so'rovi qabul qilindi va adminga yetkazildi!"}

@@ -276,6 +276,13 @@ class ApiService {
       body: JSON.stringify({ text, voice })
     });
   }
+
+  async sendSubscribeRequest(data) {
+    return await this.request('/payments/subscribe-request', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
 }
 
 export const api = new ApiService();
