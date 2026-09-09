@@ -35,6 +35,15 @@ async def cmd_start(message: types.Message):
     username = message.from_user.username
     full_name = message.from_user.full_name
 
+    # Force update chat menu button for this user so it never shows old tunnel
+    try:
+        await message.bot.set_chat_menu_button(
+            chat_id=message.chat.id,
+            menu_button=MenuButtonWebApp(text="🚀 AI Workspace", web_app=WebAppInfo(url=webapp_url))
+        )
+    except Exception as e:
+        logger.warning(f"Error updating chat menu button: {e}")
+
     # Auto-register or link telegram_id to user in DB
     try:
         async with AsyncSessionLocal() as db:

@@ -157,134 +157,118 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
   ];
 
   return (
-    <div className="space-y-6 pb-28 text-white">
-      {/* Active Subscription Status Banner */}
+    <div className="space-y-4 pb-24 sm:pb-28 text-white">
+      {/* Active Subscription Status Banner - Compact & Clean */}
       {localSub && (
-        <div className={`rounded-2xl border p-4 sm:p-5 backdrop-blur-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl transition-all ${
+        <div className={`rounded-xl border p-3 sm:p-4 backdrop-blur-xl flex items-center justify-between gap-3 shadow-lg transition-all ${
           currentPlanId !== "free" 
-            ? "bg-gradient-to-r from-emerald-950/40 via-[#0E1B17] to-teal-950/30 border-emerald-500/40 shadow-emerald-500/10" 
-            : "bg-gradient-to-r from-blue-900/30 via-indigo-900/20 to-purple-900/30 border-blue-500/30"
+            ? "bg-gradient-to-r from-emerald-950/40 via-[#0E1B17] to-teal-950/30 border-emerald-500/30" 
+            : "bg-gradient-to-r from-blue-950/40 via-[#0E121B] to-indigo-950/30 border-blue-500/30"
         }`}>
-          <div className="flex items-start space-x-3.5">
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${
+          <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+            <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 border ${
               currentPlanId !== "free" 
-                ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/20" 
+                ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400" 
                 : "bg-blue-500/20 border-blue-500/30 text-blue-400"
             }`}>
-              <Crown className="w-5 h-5" />
+              <Crown className="w-4 h-4" />
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t("current_plan_badge")}:</span>
-                <span className={`px-2.5 py-0.5 rounded-full border text-[11px] font-extrabold uppercase flex items-center gap-1 ${
+            <div className="min-w-0 space-y-0.5">
+              <div className="flex items-center space-x-1.5 flex-wrap">
+                <span className={`px-2 py-0.5 rounded-full border text-[10px] font-extrabold uppercase flex items-center gap-1 ${
                   currentPlanId !== "free" 
-                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.3)]" 
+                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40" 
                     : "bg-blue-500/20 text-blue-400 border-blue-500/30"
                 }`}>
-                  <CheckCircle2 className="w-3 h-3" />
-                  <span>{currentPlanId === "free" ? "Free Trial" : `${currentPlanId.toUpperCase()} PLAN`}</span>
-                  <span>({t("current_plan_status_active")})</span>
+                  <CheckCircle2 className="w-2.5 h-2.5" />
+                  <span>{currentPlanId === "free" ? "Free Trial" : `${currentPlanId.toUpperCase()}`}</span>
+                </span>
+                <span className="text-[11px] font-medium text-slate-300 truncate">
+                  {currentPlanId === "free" ? "1 Bot • 1K xabar/oy • CRM" : `30 kun • ${localSub.max_bots} Bot ruxsati`}
                 </span>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed max-w-xl">
-                {currentPlanId === "free" && t("current_plan_no_sub")}
-                {currentPlanId === "starter" && (t("current_plan_starter_active_desc") || t("starter_desc"))}
-                {currentPlanId === "pro" && (t("current_plan_pro_active_desc") || t("pro_desc"))}
-                {currentPlanId === "enterprise" && (t("current_plan_enterprise_active_desc") || t("enterprise_desc"))}
+              <p className="text-[10px] text-slate-400 truncate max-w-md hidden sm:block">
+                {currentPlanId === "free" ? "Golosovoy AI va ko'proq botlar uchun tarifni faollashtiring" : "Barcha imkoniyatlar 24/7 faol"}
               </p>
-              {currentPlanId !== "free" && (
-                <div className="flex items-center flex-wrap gap-2 pt-1 text-[11px] font-semibold text-emerald-400">
-                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20">
-                    <Clock className="w-3 h-3" />
-                    <span>{localSub.days_left !== null ? `${localSub.days_left} ${t("current_plan_days_left")}` : "30 kun"}</span>
-                  </span>
-                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-300 border border-blue-500/20">
-                    <span>🤖 {localSub.max_bots} {t("current_plan_bots_allowed")}</span>
-                  </span>
-                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20">
-                    <span>⚡ {t("current_plan_online_server")}</span>
-                  </span>
-                </div>
-              )}
             </div>
           </div>
           <button
             onClick={() => navigate("/pricing")}
-            className={`shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 active:scale-95 ${
+            className={`shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all border flex items-center gap-1 active:scale-95 ${
               currentPlanId !== "free"
-                ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                : "bg-blue-600 hover:bg-blue-500 text-white border-blue-500 shadow-md shadow-blue-500/20"
+                ? "bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border-emerald-500/30"
+                : "bg-blue-600 hover:bg-blue-500 text-white border-blue-500 shadow-sm"
             }`}
           >
-            <span>{currentPlanId !== "free" ? t("pricing") : t("starter_cta")}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <span>{currentPlanId !== "free" ? t("pricing") : "Tariflar"}</span>
+            <ArrowRight className="w-3 h-3" />
           </button>
         </div>
       )}
 
-      {/* Hero Welcome Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#141A26] to-[#0E121B] border border-white/[0.08] p-5 sm:p-6 shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.12)]">
+      {/* Hero Welcome Banner - Compact & Modern */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-b from-[#141A26] to-[#0E121B] border border-white/[0.08] p-3.5 sm:p-5 shadow-lg">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
         
-        <div className="relative z-10 space-y-3">
+        <div className="relative z-10 space-y-2">
           <div className="flex items-center justify-between">
-            <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-400 text-xs font-semibold tracking-wide">
-              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+            <div className="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-400 text-[10px] font-semibold tracking-wide">
+              <Sparkles className="w-3 h-3 animate-pulse" />
               <span>{t("hero_badge")}</span>
             </div>
-            <div className="hidden sm:flex items-center space-x-1.5 text-xs text-slate-400">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <div className="hidden sm:flex items-center space-x-1 text-[11px] text-slate-400">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span>{t("hero_multi_tenant")}</span>
             </div>
           </div>
 
           <div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+            <h2 className="text-base sm:text-xl font-black text-white tracking-tight leading-snug">
               {t("hero_title")}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-xl leading-relaxed">
+            <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 line-clamp-1 sm:line-clamp-none max-w-xl">
               {t("hero_subtitle")}
             </p>
           </div>
 
-          <div className="pt-2 flex flex-wrap items-center gap-3">
+          <div className="pt-1 flex flex-wrap items-center gap-2">
             <button
               onClick={() => handleCreateAgent("/agents/new")}
-              className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-semibold text-xs sm:text-sm shadow-[0_0_20px_-3px_rgba(59,130,246,0.5),inset_0_1px_0_rgba(255,255,255,0.3)] active:scale-95 transition-all duration-150"
+              className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-blue-500/30 active:scale-95 transition-all"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
               <span>{t("create_agent_btn")}</span>
             </button>
             <button
               onClick={() => navigate("/tester")}
-              className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-[#07080D]/80 hover:bg-white/[0.06] border border-white/[0.08] text-slate-300 hover:text-white font-medium text-xs sm:text-sm backdrop-blur-md transition-all duration-150"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#07080D]/80 hover:bg-white/[0.06] border border-white/[0.08] text-slate-300 hover:text-white font-medium text-xs backdrop-blur-md transition-all active:scale-95"
             >
-              <Play className="w-3.5 h-3.5 text-emerald-400" />
+              <Play className="w-3 h-3 text-emerald-400" />
               <span>{t("test_voice_btn")}</span>
             </button>
             <button
               onClick={() => navigate("/pricing")}
-              className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/40 text-amber-300 font-semibold text-xs sm:text-sm backdrop-blur-md transition-all duration-150"
+              className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-semibold text-xs backdrop-blur-md transition-all active:scale-95"
             >
-              <span className="text-amber-400">⭐</span>
+              <span className="text-amber-400 text-xs">⭐</span>
               <span>{t("pricing_btn")}</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Quick Industry Templates */}
-      <div className="space-y-3">
+      {/* Quick Industry Templates - 2 Column Compact Grid */}
+      <div className="space-y-2.5">
         <div className="flex items-center justify-between px-1">
           <div>
             <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-300">
               {t("templates_title")}
             </h3>
-            <p className="text-[11px] text-slate-500">{t("templates_subtitle")}</p>
+            <p className="text-[10px] text-slate-500">{t("templates_subtitle")}</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           {templates.map((tpl) => {
             const IconComponent = tpl.icon;
             const localizedTitle = t(`tpl_${tpl.id}_title`) !== `tpl_${tpl.id}_title` ? t(`tpl_${tpl.id}_title`) : tpl.title;
@@ -293,33 +277,33 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
               <div
                 key={tpl.id}
                 onClick={() => handleCreateAgent(`/agents/new?category=${tpl.id}`)}
-                className="group relative cursor-pointer overflow-hidden rounded-2xl bg-[#0E121B]/90 hover:bg-[#141A26] border border-white/[0.07] hover:border-blue-500/40 p-4 transition-all duration-200 hover:-translate-y-1 shadow-[0_4px_20px_rgba(0,0,0,0.4)] flex flex-col justify-between"
+                className="group relative cursor-pointer overflow-hidden rounded-xl bg-[#0E121B]/90 hover:bg-[#141A26] border border-white/[0.07] hover:border-blue-500/40 p-3 transition-all duration-200 hover:-translate-y-0.5 shadow-md flex flex-col justify-between"
               >
-                <div className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br ${tpl.accent} blur-2xl group-hover:scale-150 transition-all duration-300`} />
+                <div className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br ${tpl.accent} blur-xl group-hover:scale-150 transition-all duration-300`} />
                 
-                <div className="space-y-2.5 relative z-10">
+                <div className="space-y-1.5 relative z-10">
                   <div className="flex items-center justify-between">
-                    <div className={`p-2.5 rounded-xl border ${tpl.iconColor} group-hover:scale-110 transition-transform duration-200`}>
-                      <IconComponent className="w-4 h-4" />
+                    <div className={`p-1.5 rounded-lg border ${tpl.iconColor} group-hover:scale-110 transition-transform duration-200`}>
+                      <IconComponent className="w-3.5 h-3.5" />
                     </div>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${tpl.badgeColor}`}>
+                    <span className={`text-[9px] font-semibold px-1.5 py-0.2 rounded-full border ${tpl.badgeColor}`}>
                       {tpl.badge}
                     </span>
                   </div>
 
                   <div>
-                    <h4 className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors">
+                    <h4 className="text-xs font-bold text-white group-hover:text-blue-300 transition-colors truncate">
                       {localizedTitle}
                     </h4>
-                    <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                    <p className="text-[10px] text-slate-400 line-clamp-1 sm:line-clamp-2 leading-tight mt-0.5">
                       {localizedDesc}
                     </p>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-white/[0.05] flex items-center justify-between text-xs font-semibold text-blue-400 group-hover:text-blue-300 mt-2">
+                <div className="pt-2 border-t border-white/[0.05] flex items-center justify-between text-[10px] font-semibold text-blue-400 group-hover:text-blue-300 mt-2">
                   <span>{t("use_template")}</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>
             );
