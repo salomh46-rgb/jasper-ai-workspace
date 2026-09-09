@@ -14,6 +14,13 @@ class User(Base):
     language = Column(String(10), default="uz")
     role = Column(String(20), default="business_owner")  # 'admin', 'business_owner'
     is_active = Column(Boolean, default=True)
+    
+    # SaaS Subscription Fields
+    subscription_plan = Column(String(30), default="free")  # 'free', 'starter', 'pro', 'enterprise'
+    plan_status = Column(String(20), default="active")       # 'active', 'pending', 'expired'
+    plan_expires_at = Column(DateTime(timezone=True), nullable=True)
+    max_bots = Column(Integer, default=1)
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     agents = relationship("Agent", back_populates="owner", cascade="all, delete-orphan")

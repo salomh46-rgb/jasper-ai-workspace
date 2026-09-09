@@ -283,6 +283,10 @@ class ApiService {
       body: JSON.stringify(data)
     });
   }
+
+  async getMySubscription() {
+    return await this.request('/payments/my-subscription');
+  }
 }
 
 export const api = new ApiService();

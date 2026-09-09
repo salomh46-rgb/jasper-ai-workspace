@@ -154,6 +154,54 @@ async def handle_callbacks(call: types.CallbackQuery):
     elif call.data == "btn_leads":
         await call.answer()
         await cmd_leads(call.message)
+    elif call.data.startswith("sub_appr_"):
+        parts = call.data.split("_")
+        user_id = int(parts[2])
+        plan_id = parts[3]
+        
+        from datetime import datetime, timedelta, timezone
+        bot_limits = {"starter": 1, "pro": 3, "enterprise": 999}
+        plan_titles = {"starter": "Boshlang'ich (Starter)", "pro": "Professional (Pro)", "enterprise": "Korporativ (Enterprise)"}
+        
+        try:
+            async with AsyncSessionLocal() as db:
+                stmt = select(User).where(User.id == user_id)
+                res = await db.execute(stmt)
+                target_user = res.scalar_one_or_none()
+                if not target_user:
+                    await call.answer("Foydalanuvchi topilmadi!", show_alert=True)
+                    return
+                
+                target_user.subscription_plan = plan_id
+                target_user.plan_status = "active"
+                target_user.max_bots = bot_limits.get(plan_id, 1)
+                target_user.plan_expires_at = datetime.now(timezone.utc) + timedelta(days=30)
+                await db.commit()
+                
+                plan_name_full = plan_titles.get(plan_id, plan_id)
+                await call.answer(f"✅ {target_user.full_name} ga {plan_id.upper()} tarifi 30 kunga yoqildi!", show_alert=True)
+                
+                # Edit original message to show approval
+                await call.message.edit_text(
+                    f"{call.message.text}\n\n"
+                    f"━━━━━━━━━━━━━━━━━━━━\n"
+                    f"✅ <b>ADMIN TOMONIDAN TASDIQLANDI VA FAOLLASHTIRILDI!</b>\n"
+                    f"💎 <b>Faol Tarif:</b> {plan_name_full}\n"
+                    f"📅 <b>Amal qilish muddati:</b> 30 kun (30 kundan so'ng yangilanadi)",
+                    parse_mode="HTML"
+                )
+        except Exception as e:
+            logger.error(f"Obunani faollashtirishda xatolik: {e}")
+            await call.answer(f"Xatolik: {e}", show_alert=True)
+
+    elif call.data.startswith("sub_rej_"):
+        await call.answer("So'rov rad etildi.", show_alert=True)
+        await call.message.edit_text(
+            f"{call.message.text}\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"❌ <b>SO'ROV RAD ETILDI (To'lov tushmagan yoki bekor qilindi)</b>",
+            parse_mode="HTML"
+        )
 
 async def start_master_bot():
     global _master_bot_instance, _master_polling_task

@@ -97,6 +97,10 @@ async def auth_via_telegram(payload: TelegramAuthRequest, db: AsyncSession = Dep
             "telegram_id": user.telegram_id,
             "username": user.username,
             "full_name": user.full_name,
-            "role": user.role
+            "role": user.role,
+            "subscription_plan": getattr(user, "subscription_plan", "free") or "free",
+            "plan_status": getattr(user, "plan_status", "active") or "active",
+            "plan_expires_at": user.plan_expires_at.isoformat() if getattr(user, "plan_expires_at", None) else None,
+            "max_bots": getattr(user, "max_bots", 1) or 1
         }
     }

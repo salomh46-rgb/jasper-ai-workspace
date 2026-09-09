@@ -203,16 +203,49 @@ async def update_invoice_status(
     return {"status": "success", "invoice_id": inv.id, "new_status": inv.status}
 
 class SubscribeRequestPayload(BaseModel):
+    plan_id: str = "starter"  # 'starter', 'pro', 'enterprise'
     plan_name: str
     price: str
     sender_name: str
     sender_phone: str
     payment_method: str = "card"
 
+@router.get("/my-subscription")
+async def get_my_subscription(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    plan = getattr(current_user, "subscription_plan", "free") or "free"
+    status = getattr(current_user, "plan_status", "active") or "active"
+    expires_at = getattr(current_user, "plan_expires_at", None)
+    max_bots = getattr(current_user, "max_bots", 1) or 1
+    
+    # Calculate days remaining
+    days_left = None
+    if expires_at:
+        from datetime import timezone
+        now = datetime.now(timezone.utc)
+        diff = (expires_at - now).days
+        days_left = max(0, diff)
+
+    return {
+        "subscription_plan": plan,
+        "plan_status": status,
+        "plan_expires_at": expires_at.isoformat() if expires_at else None,
+        "days_left": days_left,
+        "max_bots": max_bots
+    }
+
 @router.post("/subscribe-request")
-async def handle_subscription_request(payload: SubscribeRequestPayload):
+async def handle_subscription_request(
+    payload: SubscribeRequestPayload,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     from app.services.notification_service import NotificationService
     await NotificationService.notify_admin_subscription_request(
+        user_id=current_user.id,
+        plan_id=payload.plan_id,
         plan_name=payload.plan_name,
         price=payload.price,
         sender_name=payload.sender_name,
@@ -220,3 +253,37 @@ async def handle_subscription_request(payload: SubscribeRequestPayload):
         payment_method=payload.payment_method
     )
     return {"status": "success", "message": "Obuna so'rovi qabul qilindi va adminga yetkazildi!"}
+
+@router.post("/admin-activate-plan")
+async def admin_activate_plan(
+    user_id: int,
+    plan_id: str,
+    days: int = 30,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != "admin" and current_user.telegram_id != settings.ADMIN_TELEGRAM_ID:
+        raise HTTPException(status_code=403, detail="Faqat tizim administratori tarifni faollashtira oladi!")
+    
+    stmt = select(User).where(User.id == user_id)
+    res = await db.execute(stmt)
+    target_user = res.scalar_one_or_none()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Foydalanuvchi topilmadi")
+    
+    from datetime import timedelta, timezone
+    bot_limits = {"starter": 1, "pro": 3, "enterprise": 999}
+    target_user.subscription_plan = plan_id
+    target_user.plan_status = "active"
+    target_user.max_bots = bot_limits.get(plan_id, 1)
+    target_user.plan_expires_at = datetime.now(timezone.utc) + timedelta(days=days)
+    
+    await db.commit()
+    await db.refresh(target_user)
+    return {
+        "status": "success",
+        "message": f"Foydalanuvchi #{user_id} uchun {plan_id} tarifi {days} kunga muvaffaqiyatli yoqildi!",
+        "user_id": target_user.id,
+        "plan": target_user.subscription_plan,
+        "expires_at": target_user.plan_expires_at.isoformat()
+    }

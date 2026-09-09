@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Check, Zap, Sparkles, Crown, ShieldCheck, ArrowRight, 
-  CreditCard, Smartphone, Send, Copy, HelpCircle, Star, Globe, MessageSquare, Headphones, Lock
+  CreditCard, Smartphone, Send, Copy, HelpCircle, Star, Globe, MessageSquare, Headphones, Lock, CheckCircle2, Clock
 } from "lucide-react";
 import { api } from "../services/api";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -16,10 +16,28 @@ export default function PricingHub() {
   const [senderPhone, setSenderPhone] = useState("+998 ");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [mySub, setMySub] = useState(null);
+  const [loadingSub, setLoadingSub] = useState(false);
 
   const cardNumber = "4916 9903 0500 7954";
   const cardHolder = "Javohirbek Asqarov (Visa)";
   const adminUsername = "Dr_eviluz";
+
+  useEffect(() => {
+    loadSubscription();
+  }, []);
+
+  const loadSubscription = async () => {
+    try {
+      setLoadingSub(true);
+      const data = await api.getMySubscription();
+      setMySub(data);
+    } catch (err) {
+      console.error("Error loading sub:", err);
+    } finally {
+      setLoadingSub(false);
+    }
+  };
 
   const plans = [
     {
@@ -32,12 +50,12 @@ export default function PricingHub() {
       badgeColor: "text-slate-400 bg-white/[0.05] border-white/10",
       desc: t("starter_desc"),
       features: [
-        "1 ta Telegram AI Bot",
-        "1,000 ta xabar / oy",
-        "Matnli AI & Smart RAG",
-        "CRM Lidlar yig'uvchi",
-        "Cheksiz Bilimlar bazasi",
-        "24/7 Ishonchli ishlash"
+        t("starter_f1"),
+        t("starter_f2"),
+        t("starter_f3"),
+        t("starter_f4"),
+        t("starter_f5"),
+        t("starter_f6")
       ],
       cta: t("starter_cta"),
       accent: "border-white/10 hover:border-blue-500/30"
@@ -52,14 +70,14 @@ export default function PricingHub() {
       badgeColor: "text-blue-400 bg-blue-500/10 border-blue-500/20",
       desc: t("pro_desc"),
       features: [
-        "3 ta Telegram AI Bot",
-        "10,000 ta xabar / oy",
-        "🎙️ Ovozli xabarlarni tushunish (Voice AI)",
-        "🌐 Ko'p tillilik (UZ, RU, EN)",
-        "📊 Google Sheets & Excel Export",
-        "👤 Live Chat & Operator Takeover",
-        "⚡ 0.0s Sub-Second Ultra Tezlik",
-        "Prioritetli qo'llab-quvvatlash"
+        t("pro_f1"),
+        t("pro_f2"),
+        t("pro_f3"),
+        t("pro_f4"),
+        t("pro_f5"),
+        t("pro_f6"),
+        t("pro_f7"),
+        t("pro_f8")
       ],
       cta: t("pro_cta"),
       accent: "border-blue-500/50 shadow-[0_0_30px_rgba(59,130,246,0.2)] bg-gradient-to-b from-[#121929] to-[#0E121B]"
@@ -74,13 +92,13 @@ export default function PricingHub() {
       badgeColor: "text-purple-400 bg-purple-500/10 border-purple-500/20",
       desc: t("enterprise_desc"),
       features: [
-        "Cheksiz Telegram AI Botlar",
-        "Cheksiz xabarlar",
-        "📂 PDF / Hujjatlar RAG yuklash",
-        "To'liq Kassa & Click/Payme integratsiyasi",
-        "Maxsus API & Webhook sozlamalari",
-        "Shaxsiy Server & Maxfiylik",
-        "24/7 Shaxsiy menejer"
+        t("enterprise_f1"),
+        t("enterprise_f2"),
+        t("enterprise_f3"),
+        t("enterprise_f4"),
+        t("enterprise_f5"),
+        t("enterprise_f6"),
+        t("enterprise_f7")
       ],
       cta: t("enterprise_cta"),
       accent: "border-purple-500/30 hover:border-purple-500/50"
@@ -104,6 +122,7 @@ export default function PricingHub() {
     try {
       setSubmitting(true);
       await api.sendSubscribeRequest({
+        plan_id: selectedPlan.id,
         plan_name: selectedPlan.name,
         price: selectedPlan.price,
         sender_name: senderName,
@@ -111,6 +130,7 @@ export default function PricingHub() {
         payment_method: paymentMethod
       });
       setSubmitted(true);
+      loadSubscription();
     } catch (err) {
       alert("Xatolik yuz berdi: " + (err.message || "Iltimos qayta urinib ko'ring"));
     } finally {
@@ -118,8 +138,41 @@ export default function PricingHub() {
     }
   };
 
+  const currentPlanId = mySub?.subscription_plan || "free";
+  const isPlanActive = mySub?.plan_status === "active";
+
   return (
     <div className="space-y-8 pb-20 animate-fade-in text-white max-w-5xl mx-auto">
+      {/* Active Subscription Status Banner */}
+      {mySub && (
+        <div className="rounded-3xl bg-gradient-to-r from-blue-900/30 via-indigo-900/20 to-purple-900/30 border border-blue-500/30 p-4 sm:p-6 backdrop-blur-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-center space-x-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+              <Crown className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t("current_plan_badge")}:</span>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-extrabold uppercase">
+                  {currentPlanId === "free" ? "Free Trial" : currentPlanId.toUpperCase()} ({t("current_plan_status_active")})
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 mt-1">
+                {currentPlanId === "free" ? (
+                  t("current_plan_no_sub")
+                ) : (
+                  <span className="flex items-center gap-1.5 text-blue-300">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{mySub.days_left !== null ? `${mySub.days_left} ${t("current_plan_days_left")}` : "30 kun"}</span>
+                    <span>• {mySub.max_bots} ta Bot ruxsati</span>
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="text-center space-y-3 pt-2">
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
@@ -136,63 +189,79 @@ export default function PricingHub() {
 
       {/* Pricing Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-        {plans.map((plan) => (
-          <div
-            key={plan.id}
-            className={`relative rounded-3xl p-6 flex flex-col justify-between border backdrop-blur-xl transition-all duration-300 ${plan.accent} ${
-              plan.popular ? "scale-105 z-10" : "bg-[#0E121B]/90 hover:bg-[#141A26]"
-            }`}
-          >
-            {plan.popular && (
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-[11px] font-bold tracking-wider uppercase text-white shadow-lg shadow-blue-500/40">
-                {t("pricing_most_popular")}
-              </div>
-            )}
+        {plans.map((plan) => {
+          const isCurrent = currentPlanId === plan.id;
+          return (
+            <div
+              key={plan.id}
+              className={`relative rounded-3xl p-6 flex flex-col justify-between border backdrop-blur-xl transition-all duration-300 ${plan.accent} ${
+                isCurrent 
+                  ? "border-emerald-500/60 shadow-[0_0_30px_rgba(16,185,129,0.25)] bg-[#0c1815]/90" 
+                  : plan.popular 
+                    ? "scale-105 z-10" 
+                    : "bg-[#0E121B]/90 hover:bg-[#141A26]"
+              }`}
+            >
+              {isCurrent && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full bg-emerald-500 text-[11px] font-extrabold tracking-wider uppercase text-black shadow-lg shadow-emerald-500/40 flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{t("current_plan_btn_active")}</span>
+                </div>
+              )}
+              {!isCurrent && plan.popular && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-[11px] font-bold tracking-wider uppercase text-white shadow-lg shadow-blue-500/40">
+                  {t("pricing_most_popular")}
+                </div>
+              )}
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${plan.badgeColor}`}>
-                  {plan.badge}
-                </span>
-              </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${plan.badgeColor}`}>
+                    {plan.badge}
+                  </span>
+                </div>
 
-              <div>
-                <h3 className="text-lg font-bold text-white">{plan.name}</h3>
-                <p className="text-xs text-slate-400 mt-1">{plan.desc}</p>
-              </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">{plan.name}</h3>
+                  <p className="text-xs text-slate-400 mt-1">{plan.desc}</p>
+                </div>
 
-              <div className="pt-2">
-                <div className="flex items-baseline space-x-1">
-                  <span className="text-3xl font-extrabold text-white tracking-tight">{plan.price}</span>
-                  <span className="text-xs text-slate-400 font-medium">so'm / {plan.period}</span>
+                <div className="pt-2">
+                  <div className="flex items-baseline space-x-1">
+                    <span className="text-3xl font-extrabold text-white tracking-tight">{plan.price}</span>
+                    <span className="text-xs text-slate-400 font-medium">so'm / {plan.period}</span>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/[0.06] space-y-2.5">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{t("pricing_features_label")}</p>
+                  {plan.features.map((feat, idx) => (
+                    <div key={idx} className="flex items-start space-x-2 text-xs text-slate-300">
+                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>{feat}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-white/[0.06] space-y-2.5">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{t("pricing_features_label")}</p>
-                {plan.features.map((feat, idx) => (
-                  <div key={idx} className="flex items-start space-x-2 text-xs text-slate-300">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <span>{feat}</span>
-                  </div>
-                ))}
+              <div className="pt-6">
+                <button
+                  onClick={() => !isCurrent && handleSelectPlan(plan)}
+                  disabled={isCurrent}
+                  className={`w-full py-3 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-md active:scale-95 ${
+                    isCurrent
+                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default opacity-90"
+                      : plan.popular
+                      ? "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white shadow-blue-500/30"
+                      : "bg-white/[0.08] hover:bg-white/[0.14] text-white"
+                  }`}
+                >
+                  {isCurrent ? `✓ ${t("current_plan_btn_active")}` : plan.cta}
+                </button>
               </div>
             </div>
-
-            <div className="pt-6">
-              <button
-                onClick={() => handleSelectPlan(plan)}
-                className={`w-full py-3 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-md active:scale-95 ${
-                  plan.popular
-                    ? "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white shadow-blue-500/30"
-                    : "bg-white/[0.08] hover:bg-white/[0.14] text-white"
-                }`}
-              >
-                {plan.cta}
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* No MCHJ / YaTT FAQ Alert */}

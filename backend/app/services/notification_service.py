@@ -141,6 +141,8 @@ class NotificationService:
     @classmethod
     async def notify_admin_subscription_request(
         cls,
+        user_id: int,
+        plan_id: str,
         plan_name: str,
         price: str,
         sender_name: str,
@@ -157,17 +159,34 @@ class NotificationService:
 
         try:
             method_label = "💳 Visa / Karta (P2P)" if payment_method == "card" else "⭐ Telegram Stars"
+            
+            kb = InlineKeyboardMarkup(inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text=f"✅ Tasdiqlash & Yoqish ({plan_id.capitalize()})", 
+                        callback_data=f"sub_appr_{user_id}_{plan_id}"
+                    )
+                ],
+                [
+                    InlineKeyboardButton(
+                        text="❌ Rad Etish (To'lanmadi)", 
+                        callback_data=f"sub_rej_{user_id}_{plan_id}"
+                    )
+                ]
+            ])
+
             msg_text = (
                 "💎 <b>YANGI SAAS OBUNA SO'ROVI QABUL QILINDI!</b>\n\n"
+                f"🆔 <b>Foydalanuvchi ID:</b> <code>#{user_id}</code>\n"
                 f"🚀 <b>Tarif:</b> {plan_name} ({price} so'm / oy)\n"
                 f"👤 <b>Mijoz:</b> {sender_name}\n"
                 f"📞 <b>Telefon:</b> <code>{sender_phone}</code>\n"
                 f"💵 <b>To'lov usuli:</b> {method_label}\n"
                 f"⏳ <b>Holat:</b> To'lov tekshiruvi kutilmoqda\n\n"
-                f"<i>Karta hisobingizni tekshirib, mijoz bilan bog'laning: {sender_phone}</i>"
+                f"<i>Karta hisobingizga pul tushgan bo'lsa, quyidagi tugma orqali 1 bosishda faollashtiring 👇</i>"
             )
 
-            await bot.send_message(chat_id=admin_id, text=msg_text, parse_mode="HTML")
+            await bot.send_message(chat_id=admin_id, text=msg_text, reply_markup=kb, parse_mode="HTML")
             logger.info(f"✅ Adminga ({admin_id}) yangi obuna so'rovi xabarnomasi yuborildi!")
         except Exception as e:
             logger.warning(f"Adminga obuna xabarnomasini yuborishda xatolik: {e}")
