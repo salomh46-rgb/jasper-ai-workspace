@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jasper_ai_workspace_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=sqlite+aiosqlite:///./data/jasper_workspace.db
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SECRET_KEY=${SECRET_KEY:-jasper-super-secret-workspace-key-2026}
+      - MASTER_BOT_TOKEN=${MASTER_BOT_TOKEN}
+    volumes:
+      - ./data:/app/data
+
+  # Frontend development or static build server
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "3000:3000"
