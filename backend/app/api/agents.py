@@ -75,12 +75,23 @@ class AgentUpdateRequest(BaseModel):
     human_takeover_enabled: Optional[bool] = None
     is_active: Optional[bool] = None
 
+class GeneratePromptRequest(BaseModel):
+    description: str
+    category: Optional[str] = "custom"
+
 class TestAgentRequest(BaseModel):
-    message: str
+    message: Optional[str] = None
+    audio_base64: Optional[str] = None
+    mime_type: Optional[str] = "audio/ogg"
 
 @router.get("/templates")
 async def get_templates():
     return TEMPLATES
+
+@router.post("/generate-prompt")
+async def generate_ai_prompt(payload: GeneratePromptRequest, current_user: User = Depends(get_current_user)):
+    res = await AIService.enhance_system_prompt(payload.description, payload.category)
+    return res
 
 @router.get("")
 async def list_agents(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -113,8 +124,11 @@ async def list_agents(db: AsyncSession = Depends(get_db), current_user: User = D
 
 @router.post("")
 async def create_agent(payload: AgentCreateRequest, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Shablonni tanlash
-    tpl = TEMPLATES.get(payload.category, TEMPLATES["clinic"])
+    tpl = TEMPLATES.get(payload.category, {
+        "system_prompt": f"Siz {payload.name} kompaniyasining aqlli AI xodimisiz.",
+        "welcome_message": "Assalomu alaykum! Sizga qanday yordam bera olaman?",
+        "default_knowledge": []
+    })
     
     sys_prompt = payload.system_prompt or tpl["system_prompt"]
     welcome_msg = payload.welcome_message or tpl["welcome_message"]
@@ -134,7 +148,6 @@ async def create_agent(payload: AgentCreateRequest, db: AsyncSession = Depends(g
     db.add(agent)
     await db.flush()
 
-    # Default bilimlarni avtomatik kiritish
     for k in tpl.get("default_knowledge", []):
         k_item = KnowledgeItem(
             agent_id=agent.id,
@@ -184,12 +197,23 @@ async def test_agent(agent_id: int, payload: TestAgentRequest, db: AsyncSession 
     if not agent:
         raise HTTPException(status_code=404, detail="Agent topilmadi")
 
-    ai_res = await AIService.generate_response(
-        agent=agent,
-        knowledge_items=agent.knowledge_items,
-        chat_history=[],
-        user_message=payload.message
-    )
+    if payload.audio_base64:
+        import base64
+        audio_bytes = base64.b64decode(payload.audio_base64)
+        ai_res = await AIService.process_voice_message(
+            agent=agent,
+            knowledge_items=agent.knowledge_items,
+            chat_history=[],
+            audio_bytes=audio_bytes,
+            mime_type=payload.mime_type or "audio/ogg"
+        )
+    else:
+        ai_res = await AIService.generate_response(
+            agent=agent,
+            knowledge_items=agent.knowledge_items,
+            chat_history=[],
+            user_message=payload.message or "Salom"
+        )
     return ai_res
 
 @router.delete("/{agent_id}")

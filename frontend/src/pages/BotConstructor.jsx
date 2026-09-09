@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
 import { 
   Save, ArrowLeft, Sparkles, Building2, ShoppingBag, 
-  GraduationCap, Wrench, Key, BookOpen, Check 
+  GraduationCap, Wrench, Key, BookOpen, Check, Wand2, X 
 } from "lucide-react";
 
 export default function BotConstructor() {
@@ -16,6 +16,10 @@ export default function BotConstructor() {
   const [saving, setSaving] = useState(false);
   const [templates, setTemplates] = useState({});
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [showAIPromptModal, setShowAIPromptModal] = useState(false);
+  const [aiPromptDesc, setAiPromptDesc] = useState("");
+  const [generatingPrompt, setGeneratingPrompt] = useState(false);
+  const [customCategoryName, setCustomCategoryName] = useState("");
   
   const [formData, setFormData] = useState({
     name: "",
@@ -34,6 +38,7 @@ export default function BotConstructor() {
     { id: "shop", label: "Do‘kon", icon: ShoppingBag },
     { id: "education", label: "O‘quv Markaz", icon: GraduationCap },
     { id: "craftsman", label: "Servis", icon: Wrench },
+    { id: "custom", label: "Maxsus / Oʻz Sohangiz", icon: Wand2 },
   ];
 
   useEffect(() => {
@@ -78,6 +83,9 @@ export default function BotConstructor() {
         system_prompt: agent.system_prompt || "",
         welcome_message: agent.welcome_message || ""
       });
+      if (!["clinic", "shop", "education", "craftsman"].includes(agent.category)) {
+        setCustomCategoryName(agent.category);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -90,12 +98,34 @@ export default function BotConstructor() {
       const tpl = templates[catId];
       return {
         ...prev,
-        category: catId,
+        category: catId === "custom" ? (customCategoryName || "Maxsus Biznes") : catId,
         name: (!id || id === "new") && tpl ? tpl.name : prev.name,
         system_prompt: (!id || id === "new") && tpl ? tpl.system_prompt : prev.system_prompt,
         welcome_message: (!id || id === "new") && tpl ? tpl.welcome_message : prev.welcome_message
       };
     });
+  };
+
+  const handleGeneratePromptWithAI = async (e) => {
+    e.preventDefault();
+    if (!aiPromptDesc.trim()) return;
+
+    try {
+      setGeneratingPrompt(true);
+      const res = await api.generateAIPrompt(aiPromptDesc.trim(), formData.category);
+      setFormData(prev => ({
+        ...prev,
+        name: res.suggested_name || prev.name,
+        system_prompt: res.system_prompt || prev.system_prompt,
+        welcome_message: res.welcome_message || prev.welcome_message
+      }));
+      setShowAIPromptModal(false);
+      setAiPromptDesc("");
+    } catch (err) {
+      alert(err.message || "AI prompt yaratishda xatolik yuz berdi");
+    } finally {
+      setGeneratingPrompt(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -150,21 +180,19 @@ export default function BotConstructor() {
               {id && id !== "new" ? "Agent Sozlamalari" : "Yangi AI Agent Yaratish"}
             </h2>
             <p className="text-xs text-slate-400">
-              Biznesingiz uchun aqlli Telegram AI operatorini sozlang
+              Istalgan soha uchun erkin, qoliplarga cheklanmagan AI operator yarating
             </p>
           </div>
         </div>
 
-        {id && id !== "new" && (
-          <button
-            type="button"
-            onClick={() => navigate(`/agents/${id}/knowledge`)}
-            className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 text-xs font-semibold transition-all active:scale-95"
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Bilimlar Bazasi</span>
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => setShowAIPromptModal(true)}
+          className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-purple-400/30 text-xs font-semibold shadow-lg shadow-purple-500/20 active:scale-95 transition-all"
+        >
+          <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+          <span>✨ AI Bilan Yaratish</span>
+        </button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -173,10 +201,10 @@ export default function BotConstructor() {
           <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
             Soha / Biznes Yoʻnalishi
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
             {categories.map((cat) => {
               const Icon = cat.icon;
-              const isSelected = formData.category === cat.id;
+              const isSelected = formData.category === cat.id || (cat.id === "custom" && !["clinic", "shop", "education", "craftsman"].includes(formData.category));
               return (
                 <button
                   key={cat.id}
@@ -190,11 +218,26 @@ export default function BotConstructor() {
                   }
                 >
                   <Icon className={"w-4 h-4 " + (isSelected ? "text-blue-400" : "text-slate-400")} />
-                  <span className="text-xs font-semibold">{cat.label}</span>
+                  <span className="text-xs font-semibold truncate">{cat.label}</span>
                 </button>
               );
             })}
           </div>
+
+          {!["clinic", "shop", "education", "craftsman"].includes(formData.category) && (
+            <div className="pt-1.5 animate-fade-in">
+              <input
+                type="text"
+                value={customCategoryName}
+                onChange={(e) => {
+                  setCustomCategoryName(e.target.value);
+                  setFormData(prev => ({ ...prev, category: e.target.value || "custom" }));
+                }}
+                placeholder="Oʻz sohangiz nomini kiriting (masalan: Restoran, Avtosalon, Mehmonxona, Mebel ishlab chiqarish...)"
+                className="w-full bg-[#07080D] border border-blue-500/40 focus:border-blue-500 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none"
+              />
+            </div>
+          )}
         </div>
 
         {/* Basic Info */}
@@ -212,7 +255,7 @@ export default function BotConstructor() {
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Masalan: Jasper Dental AI"
+                placeholder="Masalan: Samarqand Oshxona AI"
                 className="w-full bg-[#07080D] border border-white/[0.08] focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none"
               />
             </div>
@@ -223,7 +266,7 @@ export default function BotConstructor() {
                 type="text"
                 value={formData.company_name}
                 onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                placeholder="Masalan: Jasper Dental Klinikasi"
+                placeholder="Masalan: Samarqand Oshxonasi MCHJ"
                 className="w-full bg-[#07080D] border border-white/[0.08] focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none"
               />
             </div>
@@ -258,7 +301,7 @@ export default function BotConstructor() {
                 type="text"
                 value={formData.working_hours}
                 onChange={(e) => setFormData({ ...formData, working_hours: e.target.value })}
-                placeholder="09:00 - 18:00 (Har kuni)"
+                placeholder="09:00 - 22:00 (Har kuni)"
                 className="w-full bg-[#07080D] border border-white/[0.08] focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none"
               />
             </div>
@@ -294,6 +337,15 @@ export default function BotConstructor() {
               <Sparkles className="w-3.5 h-3.5" />
               <span>AI Xarakteri & Koʻrsatmalar</span>
             </h3>
+
+            <button
+              type="button"
+              onClick={() => setShowAIPromptModal(true)}
+              className="text-xs font-semibold text-purple-400 hover:text-purple-300 flex items-center gap-1"
+            >
+              <Wand2 className="w-3.5 h-3.5" />
+              <span>AI bilan avtomatik yozish</span>
+            </button>
           </div>
 
           <div className="space-y-1.5">
@@ -302,7 +354,7 @@ export default function BotConstructor() {
               type="text"
               value={formData.welcome_message}
               onChange={(e) => setFormData({ ...formData, welcome_message: e.target.value })}
-              placeholder="Assalomu alaykum! Jasper stomatologiya klinikasiga xush kelibsiz..."
+              placeholder="Assalomu alaykum! Xizmatimizga xush kelibsiz..."
               className="w-full bg-[#07080D] border border-white/[0.08] focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none"
             />
           </div>
@@ -313,7 +365,7 @@ export default function BotConstructor() {
               rows={4}
               value={formData.system_prompt}
               onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
-              placeholder="Siz Jasper Dental stomatologiya klinikasi aqlli yordamchisisiz..."
+              placeholder="Siz kompaniyaning aqlli va xushmuomala AI konsultantisiz..."
               className="w-full bg-[#07080D] border border-white/[0.08] focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none leading-relaxed"
             />
           </div>
@@ -345,6 +397,62 @@ export default function BotConstructor() {
           </button>
         </div>
       </form>
+
+      {/* AI Prompt Generator Modal */}
+      {showAIPromptModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="w-full max-w-lg rounded-2xl bg-[#0E121B] border border-white/[0.12] p-5 sm:p-6 space-y-4 shadow-2xl animate-scale-up">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <h3 className="font-bold text-base text-white flex items-center gap-2">
+                <Wand2 className="w-5 h-5 text-purple-400" />
+                <span>AI Prompt Generator (Erkin Soha)</span>
+              </h3>
+              <button 
+                onClick={() => setShowAIPromptModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleGeneratePromptWithAI} className="space-y-4">
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Biznesingiz haqida 1-2 jumlada yozing. Gemini AI siz uchun mukammal agent nomi, salomlashish matni va professional tizim koʻrsatmasini tuzib beradi.
+              </p>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Biznesingiz Tavsifi</label>
+                <textarea
+                  rows={4}
+                  required
+                  value={aiPromptDesc}
+                  onChange={(e) => setAiPromptDesc(e.target.value)}
+                  placeholder="Masalan: Biz Toshkentda mebel ishlab chiqaramiz va buyurtma asosida oshxona garniturlarini yasaymiz. Bepul o'lchov olish mavjud..."
+                  className="w-full bg-[#07080D] border border-white/[0.08] focus:border-purple-500/50 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none leading-relaxed"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end space-x-2.5">
+                <button
+                  type="button"
+                  onClick={() => setShowAIPromptModal(false)}
+                  className="px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-semibold"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  disabled={generatingPrompt}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-b from-purple-600 to-indigo-600 text-white text-xs font-semibold shadow-md active:scale-95 disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <Sparkles className={"w-3.5 h-3.5 " + (generatingPrompt ? "animate-spin" : "")} />
+                  <span>{generatingPrompt ? "Generatsiya qilinmoqda..." : "Promptni Yaratish"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

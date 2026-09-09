@@ -102,10 +102,17 @@ class ApiService {
     });
   }
 
-  async testAgent(agentId, message) {
+  async generateAIPrompt(description, category = "custom") {
+    return await this.request('/agents/generate-prompt', {
+      method: 'POST',
+      body: JSON.stringify({ description, category })
+    });
+  }
+
+  async testAgent(agentId, message, audioBase64 = null, mimeType = "audio/ogg") {
     return await this.request(`/agents/${agentId}/test`, {
       method: 'POST',
-      body: JSON.stringify({ message })
+      body: JSON.stringify({ message, audio_base64: audioBase64, mime_type: mimeType })
     });
   }
 
@@ -142,6 +149,38 @@ class ApiService {
     return await this.request(`/leads/${leadId}`, {
       method: 'PUT',
       body: JSON.stringify({ status })
+    });
+  }
+
+  async downloadLeadsExcel(agentId = null, status = null) {
+    let url = `${API_BASE_URL}/leads/export/excel`;
+    const params = new URLSearchParams();
+    if (agentId) params.append('agent_id', agentId);
+    if (status) params.append('status', status);
+    const qs = params.toString();
+    if (qs) url += `?${qs}`;
+
+    const headers = {};
+    if (this.token) headers['Authorization'] = `Bearer ${this.token}`;
+
+    const response = await fetch(url, { headers });
+    if (!response.ok) throw new Error('Excel faylni yuklab olishda xatolik yuz berdi');
+    
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = `Jasper_CRM_Lidlar_${new Date().toISOString().slice(0,10)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+  }
+
+  async syncLeadsToSheets(sheetId = "1xmeMSCZmyoheJ9h7M-krzYo5OJkkCkpk71_LluHwb60", webhookUrl = null) {
+    return await this.request('/leads/sync-sheets', {
+      method: 'POST',
+      body: JSON.stringify({ sheet_id: sheetId, webhook_url: webhookUrl })
     });
   }
 }

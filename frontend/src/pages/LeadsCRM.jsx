@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../services/api";
-import { Users, Phone, Sparkles, MessageCircle, Calendar, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { 
+  Users, Phone, Sparkles, Download, Sheet, ExternalLink, 
+  CheckCircle2, Clock, X, RefreshCw, Layers 
+} from "lucide-react";
 
 export default function LeadsCRM() {
   const [leads, setLeads] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [downloading, setDownloading] = useState(false);
+  const [showSheetsModal, setShowSheetsModal] = useState(false);
+  const [syncingSheets, setSyncingSheets] = useState(false);
+  const [sheetId, setSheetId] = useState("1xmeMSCZmyoheJ9h7M-krzYo5OJkkCkpk71_LluHwb60");
+  const [webhookUrl, setWebhookUrl] = useState("");
+  const [syncResult, setSyncResult] = useState(null);
 
   useEffect(() => {
     loadLeads();
@@ -25,7 +34,32 @@ export default function LeadsCRM() {
       await api.updateLeadStatus(leadId, newStatus);
       loadLeads();
     } catch (err) {
-      alert(err.message || "Statusni yangilab bo\'lmadi");
+      alert(err.message || "Statusni yangilab boʻlmadi");
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      setDownloading(true);
+      await api.downloadLeadsExcel(null, selectedStatus === "all" ? null : selectedStatus);
+    } catch (err) {
+      alert(err.message || "Excel yuklab olishda xatolik");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleSyncSheets = async (e) => {
+    e.preventDefault();
+    try {
+      setSyncingSheets(true);
+      const res = await api.syncLeadsToSheets(sheetId, webhookUrl || null);
+      setSyncResult(res.message || "Muvaffaqiyatli sinxronlandi!");
+      setTimeout(() => setSyncResult(null), 4000);
+    } catch (err) {
+      alert(err.message || "Sinxronlashda xatolik");
+    } finally {
+      setSyncingSheets(false);
     }
   };
 
@@ -59,13 +93,37 @@ export default function LeadsCRM() {
 
   return (
     <div className="space-y-5 pb-32">
-      {/* Header */}
-      <div>
-        <h2 className="text-base sm:text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
-          <Users className="w-5 h-5 text-emerald-400" />
-          <span>Lidlar & Buyurtmalar CRM</span>
-        </h2>
-        <p className="text-xs text-slate-400">AI Agentingiz toʻplagan barcha mijozlar, qabulga yozilishlar va kontaktlar</p>
+      {/* Header with Excel & Sheets action buttons */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 className="text-base sm:text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
+            <Users className="w-5 h-5 text-emerald-400" />
+            <span>Lidlar & Buyurtmalar CRM</span>
+          </h2>
+          <p className="text-xs text-slate-400">AI bot toʻplagan barcha mijozlar va buyurtmalar</p>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            disabled={downloading}
+            className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 border border-white/[0.08] text-slate-200 text-xs font-semibold shadow-sm transition-all"
+            title="Excel formatida yuklab olish"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{downloading ? "Yuklanmoqda..." : "Excel (.xlsx)"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowSheetsModal(true)}
+            className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 active:scale-95 border border-emerald-500/25 text-emerald-400 text-xs font-semibold shadow-sm transition-all"
+          >
+            <Sheet className="w-3.5 h-3.5" />
+            <span>Google Sheets</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter Tabs */}
@@ -73,7 +131,7 @@ export default function LeadsCRM() {
         {[
           { id: "all", label: "Barchasi" },
           { id: "new", label: "Yangi Lidlar" },
-          { id: "in_progress", label: "Bog\'lanilgan" },
+          { id: "in_progress", label: "Bogʻlanilgan" },
           { id: "completed", label: "Muvaffaqiyatli" },
         ].map(tab => (
           <button
@@ -107,7 +165,7 @@ export default function LeadsCRM() {
                   </div>
                   <div className="flex items-center space-x-2 text-xs font-mono text-slate-300 mt-1">
                     <Phone className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>{lead.customer_phone || "Raqam yo\'q"}</span>
+                    <span>{lead.customer_phone || "Raqam yoʻq"}</span>
                   </div>
                 </div>
 
@@ -116,7 +174,7 @@ export default function LeadsCRM() {
                     <a
                       href={"tel:" + lead.customer_phone}
                       className="p-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all active:scale-95"
-                      title="Qo\'ng\'iroq qilish"
+                      title="Qoʻngʻiroq qilish"
                     >
                       <Phone className="w-4 h-4" />
                     </a>
@@ -157,6 +215,87 @@ export default function LeadsCRM() {
           <Users className="w-10 h-10 text-slate-400 mx-auto opacity-50" />
           <p className="text-sm font-semibold text-slate-200">Ushbu holatda lidlar topilmadi</p>
           <p className="text-xs text-slate-400">Mijozlar Telegram botingizga yozishganda, ularning kontaktlari bu yerda aks etadi.</p>
+        </div>
+      )}
+
+      {/* Google Sheets Modal */}
+      {showSheetsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="w-full max-w-lg rounded-2xl bg-[#0E121B] border border-white/[0.12] p-5 sm:p-6 space-y-4 shadow-2xl animate-scale-up">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <h3 className="font-bold text-base text-white flex items-center gap-2">
+                <Sheet className="w-5 h-5 text-emerald-400" />
+                <span>Google Sheets Integratsiyasi</span>
+              </h3>
+              <button 
+                onClick={() => setShowSheetsModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSyncSheets} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Google Sheets ID</label>
+                <input
+                  type="text"
+                  value={sheetId}
+                  onChange={(e) => setSheetId(e.target.value)}
+                  placeholder="1xmeMSCZmyoheJ9h7M-krzYo5OJkkCkpk71_LluHwb60"
+                  className="w-full bg-[#07080D] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white font-mono outline-none"
+                />
+                <a
+                  href={`https://docs.google.com/spreadsheets/d/${sheetId}/edit`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] text-emerald-400 hover:underline pt-0.5"
+                >
+                  <span>Google Sheets Jadvalini Ochish</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Apps Script Webhook URL (Ixtiyoriy)</label>
+                <input
+                  type="text"
+                  value={webhookUrl}
+                  onChange={(e) => setWebhookUrl(e.target.value)}
+                  placeholder="https://script.google.com/macros/s/.../exec"
+                  className="w-full bg-[#07080D] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-600 outline-none"
+                />
+                <p className="text-[11px] text-slate-400">
+                  Google Apps Script webhook havolasini kiritsangiz, har bir yangi lid avtomatik ravishda jadval qatoriga qoʻshiladi.
+                </p>
+              </div>
+
+              {syncResult && (
+                <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{syncResult}</span>
+                </div>
+              )}
+
+              <div className="pt-2 flex items-center justify-end space-x-2.5">
+                <button
+                  type="button"
+                  onClick={() => setShowSheetsModal(false)}
+                  className="px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-semibold"
+                >
+                  Yopish
+                </button>
+                <button
+                  type="submit"
+                  disabled={syncingSheets}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-b from-emerald-500 to-teal-600 text-white text-xs font-semibold shadow-md active:scale-95 disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <RefreshCw className={"w-3.5 h-3.5 " + (syncingSheets ? "animate-spin" : "")} />
+                  <span>{syncingSheets ? "Sinxronlanmoqda..." : "Hozir Sinxronlash"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

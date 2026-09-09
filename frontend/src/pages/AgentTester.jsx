@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { api } from "../services/api";
-import { Bot, Send, User, Sparkles, CheckCircle, Zap } from "lucide-react";
+import { Bot, Send, User, Sparkles, CheckCircle, Mic, MicOff, Volume2 } from "lucide-react";
 
 export default function AgentTester({ agents }) {
   const [selectedAgentId, setSelectedAgentId] = useState(agents?.[0]?.id || null);
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
 
   useEffect(() => {
     if (agents && agents.length > 0 && !selectedAgentId) {
@@ -26,8 +29,8 @@ export default function AgentTester({ agents }) {
     }
   }, [selectedAgentId]);
 
-  const handleSend = async (e) => {
-    e.preventDefault();
+  const handleSendText = async (e) => {
+    if (e) e.preventDefault();
     if (!inputText.trim() || !selectedAgentId || loading) return;
 
     const userMsg = inputText.trim();
@@ -55,6 +58,62 @@ export default function AgentTester({ agents }) {
     }
   };
 
+  const startVoiceRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorderRef.current.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/ogg" });
+        const reader = new FileReader();
+        reader.readAsDataURL(audioBlob);
+        reader.onloadend = async () => {
+          const base64Audio = reader.result.split(",")[1];
+          setMessages(prev => [...prev, { sender: "customer", text: "🎙️ [Ovozli xabar yuborildi]" }]);
+          try {
+            setLoading(true);
+            const res = await api.testAgent(selectedAgentId, null, base64Audio, "audio/ogg");
+            setMessages(prev => [
+              ...prev,
+              {
+                sender: "ai",
+                text: res.reply,
+                lead_data: res.lead_data
+              }
+            ]);
+          } catch (err) {
+            setMessages(prev => [
+              ...prev,
+              { sender: "ai", text: "Ovozni tushunishda xatolik: " + err.message }
+            ]);
+          } finally {
+            setLoading(false);
+          }
+        };
+      };
+
+      mediaRecorderRef.current.start();
+      setRecording(true);
+    } catch (err) {
+      alert("Mikrofonga ruxsat berilmadi: " + err.message);
+    }
+  };
+
+  const stopVoiceRecording = () => {
+    if (mediaRecorderRef.current && recording) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      setRecording(false);
+    }
+  };
+
   return (
     <div className="space-y-4 pb-28 h-[calc(100vh-140px)] flex flex-col">
       {/* Top Selector Bar */}
@@ -72,9 +131,9 @@ export default function AgentTester({ agents }) {
             ))}
           </select>
         </div>
-        <div className="inline-flex items-center space-x-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+        <div className="inline-flex items-center space-x-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>Jonli Rejim</span>
+          <span>Ovoz & Matn Faol</span>
         </div>
       </div>
 
@@ -120,23 +179,45 @@ export default function AgentTester({ agents }) {
             <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce" />
             <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce delay-100" />
             <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce delay-200" />
-            <span className="text-xs text-slate-500 font-medium ml-1">Gemini AI javob yozmoqda...</span>
+            <span className="text-xs text-slate-500 font-medium ml-1">Gemini AI tahlil qilmoqda...</span>
           </div>
         )}
       </div>
 
       {/* Input bar */}
-      <form onSubmit={handleSend} className="flex items-center space-x-2">
+      <form onSubmit={handleSendText} className="flex items-center space-x-2">
         <input
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder="AI Agentga savol bering yoki buyurtma qoldiring..."
+          placeholder={recording ? "Ovoz yozilmoqda..." : "Matn yozing yoki mikrofon orqali gapiring..."}
+          disabled={recording}
           className="flex-1 bg-[#0E121B] border border-white/[0.08] focus:border-blue-500/50 rounded-xl px-4 py-3 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition-all shadow-inner"
         />
+
+        {recording ? (
+          <button
+            type="button"
+            onClick={stopVoiceRecording}
+            className="p-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/40 active:scale-95 animate-pulse"
+            title="Ovozni yuborish"
+          >
+            <MicOff className="w-4 h-4" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={startVoiceRecording}
+            className="p-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-slate-300 hover:text-white border border-white/[0.08] active:scale-95 transition-all"
+            title="Ovozli xabar yozish"
+          >
+            <Mic className="w-4 h-4 text-emerald-400" />
+          </button>
+        )}
+
         <button
           type="submit"
-          disabled={!inputText.trim() || loading}
+          disabled={!inputText.trim() || loading || recording}
           className="p-3 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white shadow-md shadow-blue-600/30 active:scale-95 disabled:opacity-40 transition-all"
         >
           <Send className="w-4 h-4" />
