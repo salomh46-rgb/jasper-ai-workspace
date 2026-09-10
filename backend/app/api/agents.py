@@ -82,6 +82,15 @@ TEMPLATES = {
     }
 }
 
+class ValidateTokenRequest(BaseModel):
+    token: str
+
+class AIWizardRequest(BaseModel):
+    business_name: str
+    category: Optional[str] = "custom"
+    phone: Optional[str] = ""
+    address: Optional[str] = ""
+
 class AgentCreateRequest(BaseModel):
     name: str
     category: str = "clinic"
@@ -96,6 +105,7 @@ class AgentCreateRequest(BaseModel):
     click_service_id: Optional[str] = None
     payme_merchant_id: Optional[str] = None
     uzum_card_number: Optional[str] = None
+    custom_knowledge_items: Optional[List[dict]] = None
 
 class AgentUpdateRequest(BaseModel):
     name: Optional[str] = None
@@ -130,6 +140,44 @@ class TTSRequest(BaseModel):
 @router.get("/templates")
 async def get_templates():
     return TEMPLATES
+
+@router.post("/validate-token")
+async def validate_telegram_token(payload: ValidateTokenRequest):
+    """Telegram BotFather tokenini jonli tekshirish va bot ma'lumotlarini qaytarish"""
+    tok = (payload.token or "").strip()
+    if not tok or ":" not in tok:
+        return {"valid": False, "error": "Token formati noto'g'ri. Masalan: 123456789:ABC-DEF..."}
+    
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=6.0) as client:
+            res = await client.get(f"https://api.telegram.org/bot{tok}/getMe")
+            data = res.json()
+            if data.get("ok"):
+                bot_info = data.get("result", {})
+                return {
+                    "valid": True,
+                    "bot_id": bot_info.get("id"),
+                    "bot_username": bot_info.get("username"),
+                    "bot_name": bot_info.get("first_name"),
+                    "can_join_groups": bot_info.get("can_join_groups", True),
+                    "can_read_all_group_messages": bot_info.get("can_read_all_group_messages", False)
+                }
+            else:
+                return {"valid": False, "error": data.get("description", "Token yaroqsiz yoki BotFather dan bekor qilingan")}
+    except Exception as e:
+        return {"valid": False, "error": f"Telegram serveriga ulanishda xatolik yuz berdi"}
+
+@router.post("/ai-wizard")
+async def generate_ai_wizard(payload: AIWizardRequest, current_user: User = Depends(get_current_user)):
+    """1-bosishda butun biznes uchun to'liq agent va bilimlar bazasini generatsiya qilish"""
+    res = await AIService.generate_complete_business_pack(
+        business_name=payload.business_name,
+        category=payload.category or "custom",
+        phone=payload.phone or "",
+        address=payload.address or ""
+    )
+    return res
 
 @router.post("/generate-prompt")
 async def generate_ai_prompt(payload: GeneratePromptRequest, current_user: User = Depends(get_current_user)):
@@ -216,12 +264,13 @@ async def create_agent(payload: AgentCreateRequest, db: AsyncSession = Depends(g
     db.add(agent)
     await db.flush()
 
-    for k in tpl.get("default_knowledge", []):
+    knowledge_to_add = payload.custom_knowledge_items if (payload.custom_knowledge_items and len(payload.custom_knowledge_items) > 0) else tpl.get("default_knowledge", [])
+    for k in knowledge_to_add:
         k_item = KnowledgeItem(
             agent_id=agent.id,
-            title=k["title"],
-            content=k["content"],
-            category=k["category"]
+            title=k.get("title", "Ma'lumot"),
+            content=k.get("content", ""),
+            category=k.get("category", "service")
         )
         db.add(k_item)
 

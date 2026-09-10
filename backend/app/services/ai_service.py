@@ -235,3 +235,76 @@ Javobingizni FAQAT quyidagi JSON formatda qaytaring:
                     "system_prompt": f"Siz {user_description} bo'yicha aqlli yordamchisiz.",
                     "welcome_message": "Assalomu alaykum! Sizga qanday yordam bera olaman?"
                 }
+
+    @classmethod
+    async def generate_complete_business_pack(
+        cls, business_name: str, category: str = "custom", phone: str = "", address: str = ""
+    ) -> Dict[str, Any]:
+        """1-bosishda butun biznes uchun to'liq agent va bilimlar bazasini generatsiya qilish"""
+        prompt = f"""Siz biznesni avtomatlashtirish bo'yicha eng tajribali AI mutaxassissiz.
+Biznes nomi: "{business_name}"
+Sohasi/Yo'nalishi: "{category}"
+Telefon: "{phone or "Mavjud emas"}"
+Manzil: "{address or "Toshkent shahri"}"
+
+Ushbu biznes uchun O'zbekiston bozoriga mos, eng yuqori sifatli Telegram AI sotuvchi/konsultant xodimining to'liq ma'lumotlar paketini yarating:
+1. "name": Botning chiroyli nomi (Masalan: "{business_name} AI Yordamchi")
+2. "system_prompt": Mijozlar bilan muloyim, tezkor va savdoni oshiruvchi xulq-atvor qoidasi (UZ/RU/EN ko'p tillilik qoidasi bilan)
+3. "welcome_message": Telegramda /start bosganda chiqadigan samimiy, emoji va bo'limlar bilan bezatilgan salomlashish xabari
+4. "knowledge_items": Aynan shu sohaga mos 4 ta tayyor bilimlar bazasi elementi:
+   - 1-bilim: "Ish vaqti va lokatsiya" (Manzil, ish vaqti, mo'ljal) -> category: "service"
+   - 2-bilim: "Asosiy xizmatlar va narxlar" (Sohaga mos 3-4 ta xizmat/mahsulot va o'rtacha narxlari) -> category: "price"
+   - 3-bilim: "Ko'p beriladigan savollar (FAQ)" (Mijozlar eng ko'p so'raydigan 2-3 ta savol va aniq javoblar) -> category: "faq"
+   - 4-bilim: "Yetkazib berish va to'lov shartlari" (Click, Payme, naqd va yetkazish) -> category: "policy"
+
+Javobingizni FAQAT quyidagi JSON formatida bering:
+{{
+  "name": "{business_name} AI Xodimi",
+  "system_prompt": "...",
+  "welcome_message": "...",
+  "knowledge_items": [
+    {{"title": "Ish vaqti va manzil", "category": "service", "content": "..."}},
+    {{"title": "Asosiy xizmatlar va narxlar", "category": "price", "content": "..."}},
+    {{"title": "Ko'p beriladigan savollar (FAQ)", "category": "faq", "content": "..."}},
+    {{"title": "Yetkazib berish va to'lov", "category": "policy", "content": "..."}}
+  ]
+}}"""
+
+        fallback = {
+            "name": f"{business_name} AI Xodimi",
+            "system_prompt": f"Siz {business_name} kompaniyasining aqlli, xushmuomala va professional AI konsultantisiz. Mijozlarga barcha savollar bo'yicha yordam bering.",
+            "welcome_message": f"Assalomu alaykum! {business_name} xizmatiga xush kelibsiz. Sizga qanday yordam bera olaman?",
+            "knowledge_items": [
+                {"title": "Ish vaqti va manzil", "category": "service", "content": f"Manzil: {address or 'Toshkent sh.'}\nTelefon: {phone or '+998 90 123 45 67'}\nIsh vaqti: Har kuni 09:00 dan 20:00 gacha."},
+                {"title": "Xizmatlar va narxlar", "category": "price", "content": f"{business_name} barcha asosiy xizmatlarni qulay narxlarda taqdim etadi. Batafsil ma'lumot uchun menejer bilan bog'lanishingiz mumkin."},
+                {"title": "Savol-Javob (FAQ)", "category": "faq", "content": "1. Qanday buyurtma berish mumkin? - Botga xabar yozish yoki telefon orqali.\n2. Bepul konsultatsiya bormi? - Ha, birinchi so'rov bepul."},
+                {"title": "To'lov turlari", "category": "policy", "content": "Click, Payme, Uzum Bank va naqd to'lovlar qabul qilinadi."}
+            ]
+        }
+
+        api_key = settings.GEMINI_API_KEY
+        if not api_key or api_key == "YOUR_GEMINI_API_KEY_HERE":
+            return fallback
+
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key={api_key}"
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": 0.3,
+                "responseMimeType": "application/json"
+            }
+        }
+
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            try:
+                res = await client.post(url, json=payload)
+                if res.status_code == 200:
+                    data = res.json()
+                    text = data["candidates"][0]["content"]["parts"][0]["text"]
+                    parsed = json.loads(text)
+                    if "name" in parsed and "system_prompt" in parsed:
+                        return parsed
+                return fallback
+            except Exception as e:
+                logger.error(f"Error in generate_complete_business_pack: {e}")
+                return fallback

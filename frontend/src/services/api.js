@@ -102,6 +102,20 @@ class ApiService {
     });
   }
 
+  async validateToken(token) {
+    return await this.request('/agents/validate-token', {
+      method: 'POST',
+      body: JSON.stringify({ token })
+    });
+  }
+
+  async generateAIWizard(data) {
+    return await this.request('/agents/ai-wizard', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
   async generateAIPrompt(description, category = "custom") {
     return await this.request('/agents/generate-prompt', {
       method: 'POST',
