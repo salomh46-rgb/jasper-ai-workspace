@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { useLanguage } from "../i18n/LanguageContext";
+import { HolographicCloudIcon, NeuralSynapseIcon, QuantumCubeIcon, RadarCoreIcon } from "../components/MicroIcons";
 import { 
   Plus, Trash2, ArrowLeft, BookOpen, Sparkles, 
   Search, FileText, CheckCircle2, X, UploadCloud, 
@@ -34,6 +35,12 @@ export default function KnowledgeHub() {
 
   const [uploadCategory, setUploadCategory] = useState("price");
   const [uploadCustomCategory, setUploadCustomCategory] = useState("");
+
+  const handleSpotlightMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+    e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
+  };
 
   const categories = [
     { id: "service", label: t("kb_cat_service") },
@@ -247,7 +254,7 @@ export default function KnowledgeHub() {
           filteredKnowledge.map((item) => (
             <div
               key={item.id}
-              className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition space-y-2 relative group backdrop-blur-md"
+              onMouseMove={handleSpotlightMove} className="p-4 rounded-2xl spotlight-card transition space-y-2 relative group"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -434,8 +441,10 @@ export default function KnowledgeHub() {
 
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-white/[0.12] hover:border-purple-500/50 rounded-2xl p-8 text-center cursor-pointer transition bg-white/[0.01] hover:bg-white/[0.03]"
+                onMouseMove={handleSpotlightMove}
+                className="relative border-beam-container spotlight-card rounded-2xl p-8 text-center cursor-pointer transition border border-purple-500/30 hover:border-purple-500/60 shadow-2xl"
               >
+                <div className="border-beam" />
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -443,9 +452,11 @@ export default function KnowledgeHub() {
                   accept=".pdf,.xlsx,.csv,.txt,.docx,.png,.jpg,.jpeg"
                   className="hidden"
                 />
-                <UploadCloud className="w-10 h-10 text-purple-400/80 mx-auto mb-2 animate-pulse" />
-                <h4 className="text-xs font-bold text-white">{t("kb_file_drag_title")}</h4>
-                <p className="text-[11px] text-white/40 mt-1">{t("kb_file_drag_sub")}</p>
+                <div className="mb-3 flex justify-center">
+                  <HolographicCloudIcon className="w-14 h-14" />
+                </div>
+                <h4 className="text-xs font-bold text-white tracking-wide">{t("kb_file_drag_title")}</h4>
+                <p className="text-[11px] text-slate-400 mt-1">{t("kb_file_drag_sub")}</p>
               </div>
 
               {uploading && (

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
 import { useLanguage } from "../i18n/LanguageContext";
+import { QuantumCubeIcon, SpinningGearIcon, LightningPulseIcon, NeuralSynapseIcon, RadarCoreIcon } from "../components/MicroIcons";
 import { 
   Save, ArrowLeft, Sparkles, Building2, ShoppingBag, 
   GraduationCap, Wrench, Key, BookOpen, Check, Wand2, X, Trash2,
@@ -50,6 +51,12 @@ export default function BotConstructor() {
     payme_merchant_id: "",
     uzum_card_number: ""
   });
+
+  const handleSpotlightMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+    e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
+  };
 
   const categories = [
     { id: "clinic", label: t("cat_clinic") || "Klinika & Stomatologiya", icon: Building2, color: "from-blue-500/20 to-cyan-500/20" },

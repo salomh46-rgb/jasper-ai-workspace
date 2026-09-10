@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bot, RefreshCw, Zap, Sparkles, Star, Globe, ChevronDown } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
+import { RadarCoreIcon } from "./MicroIcons";
 
 export default function Navbar({ user, stats, onRefresh }) {
   const navigate = useNavigate();
@@ -21,8 +22,8 @@ export default function Navbar({ user, stats, onRefresh }) {
       <div className="flex items-center space-x-2.5 cursor-pointer shrink-0" onClick={() => navigate("/")}>
         <div className="relative group cursor-pointer">
           <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg blur-sm opacity-60 group-hover:opacity-100 transition duration-300" />
-          <div className="relative w-8 h-8 rounded-lg bg-[#0E121B] border border-white/10 flex items-center justify-center shadow-lg">
-            <Bot className="w-4 h-4 text-blue-400" />
+          <div className="relative w-8 h-8 rounded-lg bg-[#0E121B] border border-white/10 flex items-center justify-center shadow-lg overflow-hidden p-1">
+            <RadarCoreIcon className="w-full h-full" />
           </div>
         </div>
         <div>

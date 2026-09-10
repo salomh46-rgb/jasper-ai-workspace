@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import { api } from './services/api';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
+import CanvasConstellation from './components/CanvasConstellation';
 import Dashboard from './pages/Dashboard';
 import BotConstructor from './pages/BotConstructor';
 import KnowledgeHub from './pages/KnowledgeHub';
@@ -80,10 +81,11 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-tg-bg text-tg-text flex flex-col">
+    <div className="min-h-screen bg-tg-bg text-tg-text flex flex-col relative overflow-hidden">
+      <CanvasConstellation />
       <Navbar user={user} stats={stats} mySub={mySub} onRefresh={loadData} />
       
-      <main className="flex-1 max-w-4xl w-full mx-auto p-4">
+      <main className="flex-1 max-w-4xl w-full mx-auto p-4 relative z-10">
         <Routes>
           <Route path="/" element={<Dashboard stats={stats} agents={agents} leads={leads} mySub={mySub} onRefreshSub={loadData} />} />
           <Route path="/agents" element={<Dashboard stats={stats} agents={agents} leads={leads} mySub={mySub} onRefreshSub={loadData} />} />

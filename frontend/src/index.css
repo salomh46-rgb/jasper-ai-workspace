@@ -16,6 +16,7 @@
     background-size: 100% 100%, 100% 100%, 24px 24px;
     background-attachment: fixed;
     min-height: 100vh;
+    overflow-x: hidden;
   }
 }
 
@@ -35,23 +36,136 @@
   background: rgba(255, 255, 255, 0.22);
 }
 
-.glass-card {
-  background: rgba(14, 18, 27, 0.75);
+/* 2026 Elite UI Engine: Spotlight Cards */
+.spotlight-card {
+  position: relative;
+  border-radius: 1rem;
+  background: rgba(14, 18, 27, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.07);
   box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+.spotlight-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    400px circle at var(--mouse-x, -500px) var(--mouse-y, -500px),
+    rgba(59, 130, 246, 0.14),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
 }
 
-.glass-card-interactive {
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+.spotlight-card:hover::before {
+  opacity: 1;
 }
 
-.glass-card-interactive:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.7), 0 0 20px -2px rgba(59, 130, 246, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+.spotlight-card:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1.5px);
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.8), 0 0 24px -4px rgba(59, 130, 246, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+}
+
+/* MagicUI 360° Rotating Border-Beam */
+.border-beam-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.border-beam {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--beam-angle, 0deg) at 50% 50%,
+    transparent 0%,
+    transparent 60%,
+    #3B82F6 80%,
+    #60A5FA 90%,
+    #93C5FD 95%,
+    transparent 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: border-beam-spin 4s linear infinite;
+}
+
+@property --beam-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes border-beam-spin {
+  from {
+    --beam-angle: 0deg;
+  }
+  to {
+    --beam-angle: 360deg;
+  }
+}
+
+/* 2026 Micro-Keyframe Animations */
+@keyframes radar-sweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float-3d {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(2deg);
+  }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.05);
+  }
+}
+
+.animate-radar-sweep {
+  animation: radar-sweep 4s linear infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}
+
+.animate-float-3d {
+  animation: float-3d 3.5s ease-in-out infinite;
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
 }

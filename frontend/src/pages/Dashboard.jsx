@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { useLanguage } from "../i18n/LanguageContext";
+import { QuantumCubeIcon, SpinningGearIcon, LightningPulseIcon, IsometricLayersIcon, NeuralSynapseIcon, RadarCoreIcon } from "../components/MicroIcons";
 import { 
   Bot, Users, MessageSquare, Plus, ArrowRight, Sparkles, 
   Building2, ShoppingBag, GraduationCap, Wrench, Zap, TrendingUp, 
@@ -33,6 +34,12 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
     } catch (err) {
       console.error("Error loading sub in dashboard:", err);
     }
+  };
+
+  const handleSpotlightMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+    e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
   };
 
   const maxBots = localSub?.max_bots || (localSub?.subscription_plan === 'starter' ? 2 : localSub?.subscription_plan === 'pro' ? 3 : 1);
@@ -206,9 +213,13 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
         </div>
       )}
 
-      {/* Hero Welcome Banner - Compact & Modern */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-b from-[#141A26] to-[#0E121B] border border-white/[0.08] p-3.5 sm:p-5 shadow-lg">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
+      {/* Hero Welcome Banner with 2026 Border-Beam & Spotlight */}
+      <div 
+        onMouseMove={handleSpotlightMove}
+        className="relative border-beam-container spotlight-card rounded-2xl bg-gradient-to-b from-[#141A26] to-[#0E121B] border border-white/[0.08] p-4 sm:p-6 shadow-2xl"
+      >
+        <div className="border-beam" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
         
         <div className="relative z-10 space-y-2">
           <div className="flex items-center justify-between">
@@ -277,7 +288,7 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
               <div
                 key={tpl.id}
                 onClick={() => handleCreateAgent(`/agents/new?category=${tpl.id}`)}
-                className="group relative cursor-pointer overflow-hidden rounded-xl bg-[#0E121B]/90 hover:bg-[#141A26] border border-white/[0.07] hover:border-blue-500/40 p-3 transition-all duration-200 hover:-translate-y-0.5 shadow-md flex flex-col justify-between"
+                onMouseMove={handleSpotlightMove} className="group relative cursor-pointer spotlight-card rounded-2xl p-3.5 transition-all duration-200 shadow-lg flex flex-col justify-between"
               >
                 <div className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br ${tpl.accent} blur-xl group-hover:scale-150 transition-all duration-300`} />
                 
@@ -369,7 +380,7 @@ export default function Dashboard({ stats, agents: initialAgents, mySub: propSub
               <div
                 key={agent.id}
                 onClick={() => navigate(`/agents/${agent.id}`)}
-                className="group relative cursor-pointer rounded-2xl bg-[#0E121B]/90 hover:bg-[#141A26] border border-white/[0.08] hover:border-blue-500/40 p-4 transition-all duration-200 shadow-md space-y-3"
+                onMouseMove={handleSpotlightMove} className="group relative cursor-pointer spotlight-card rounded-2xl p-4 transition-all duration-200 shadow-lg space-y-3"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
