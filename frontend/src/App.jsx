@@ -90,6 +90,7 @@ export default function App() {
           <Route path="/agents/new" element={<BotConstructor />} />
           <Route path="/agents/:id" element={<BotConstructor />} />
           <Route path="/agents/:agentId/knowledge" element={<KnowledgeHub />} />
+          <Route path="/knowledge/:agentId" element={<KnowledgeHub />} />
           <Route path="/leads" element={<LeadsCRM />} />
           <Route path="/tester" element={<AgentTester agents={agents} />} />
           <Route path="/chat" element={<LiveChatInbox />} />
